@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
-from model import db, Produtos
+from model import db
 import controller as ct
 import os
 
@@ -18,8 +18,14 @@ with app.app_context():
 @app.route('/', methods = ['GET'])
 def index():
     
-    produto = ct.get_all_prod()
-    return render_template('index.html', produto=produto)
+    produtos_com_imagens = ct.get_all_prod_with_images()
+    return render_template('index.html', produto=produtos_com_imagens)
+
+@app.route('/home', methods = ['GET'])
+def home():
+    
+    produtos_com_imagens = ct.get_all_prod_with_images()
+    return render_template('home.html', produto=produtos_com_imagens)
 
 @app.route('/add', methods=['POST'])
 def add_pizza():
@@ -28,12 +34,14 @@ def add_pizza():
         ingredientes_novo = request.form.get('ingredientes')
         preco_novo = request.form.get('preco')
 
+        nome_imagem = request.form.get('image_name')
+        imagem_dados = request.files['image_data'].read() if 'image_data' in request.files else None
         try:
             preco_formatado = float(preco_novo)
             ct.create_prod(nome = nome_novo,ingredientes=ingredientes_novo,preco = preco_formatado)
         except (ValueError, TypeError):
             return "Preço invalido", 400
-        return redirect(url_for('index'))
+        return redirect(url_for('home'))
 
 @app.route('/remove/<int:id>', methods=['DELETE'])
 def delete(id):
@@ -44,4 +52,4 @@ def delete(id):
     
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=80 ,debug=True)
