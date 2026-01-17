@@ -1,0 +1,47 @@
+from flask import Flask, render_template, request, redirect, url_for
+from model import db, Produtos
+import controller as ct
+import os
+
+app = Flask(__name__)
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'banco.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
+
+@app.route('/', methods = ['GET'])
+def index():
+    
+    produto = ct.get_all_prod()
+    return render_template('index.html', produto=produto)
+
+@app.route('/add', methods=['POST'])
+def add_pizza():
+    if request.method == "POST":
+        nome_novo = request.form.get('nome')
+        ingredientes_novo = request.form.get('ingredientes')
+        preco_novo = request.form.get('preco')
+
+        try:
+            preco_formatado = float(preco_novo)
+            ct.create_prod(nome = nome_novo,ingredientes=ingredientes_novo,preco = preco_formatado)
+        except (ValueError, TypeError):
+            return "Preço invalido", 400
+        return redirect(url_for('index'))
+
+@app.route('/remove/<int:id>', methods=['DELETE'])
+def delete(id):
+    if ct.delete_prod(id=id):
+        return '', 204
+    else:
+        return "Erro não funcao"
+    
+
+if __name__ == "__main__":
+    app.run(debug=True)

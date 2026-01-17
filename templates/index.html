@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardapio pizza</title>
+</head>
+<body>
+    <header>
+        <form action="/add" method="post">
+            <input type="text" name="nome" id="nome" placeholder="Nome Produto">
+            <input type="text" name="ingredientes" id="ingredientes" placeholder="Digite os ingredientes">
+            <input type="number" name="preco" min="0" step="0.01" value="0.00" id="preco" >
+            <input type="submit" value="Criar">
+        </form>
+        
+    </header>
+    <div class="container-principal">
+        {% for i in produto %}
+            <div class="container-produto">
+                <h2>{{ i.nome }}</h2>
+                <span>{{ i.ingredientes }}</span>
+                <h4>R$ {{ i.preco }}</h4>
+                <input type="button" class="btn-deletar" data-id="{{ i.id }}" value="Excluir">
+
+            </div><!--container-produto-->
+        {% endfor %}
+    </div><!--container principal-->
+    <script>
+        
+        document.querySelectorAll('.btn-deletar').forEach(botao =>{
+            botao.addEventListener('click', function(){
+                const id = this.getAttribute('data-id');
+
+                if(confirm("Tem certeza que deseja apagar?")){
+                    fetch(`/remove/${id}`, {
+                        method: 'DELETE',
+                    }).then(response =>{
+                        if(response.ok){
+                            //document.getElementById(`item-${id}`).remove()
+                            window.location.reload();
+
+                        }else{
+                            alert('Erro ao deletar no servidor');
+                        }
+                    }).catch(err => console.error('Erro: ', err));
+                }
+            })
+        })
+
+    </script>
+</body>
+</html>
