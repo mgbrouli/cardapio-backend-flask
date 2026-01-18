@@ -33,12 +33,20 @@ def add_pizza():
         nome_novo = request.form.get('nome')
         ingredientes_novo = request.form.get('ingredientes')
         preco_novo = request.form.get('preco')
-
-        nome_imagem = request.form.get('image_name')
-        imagem_dados = request.files['image_data'].read() if 'image_data' in request.files else None
+        
+        # Processar a imagem
+        imagem_arquivo = request.files.get('image')
+        nome_imagem = None
+        imagem_dados = None
+        
+        if imagem_arquivo:
+            nome_imagem = imagem_arquivo.filename
+            imagem_dados = imagem_arquivo.read()
+        
         try:
             preco_formatado = float(preco_novo)
-            ct.create_prod(nome = nome_novo,ingredientes=ingredientes_novo,preco = preco_formatado)
+            ct.create_prod(nome=nome_novo, ingredientes=ingredientes_novo, preco=preco_formatado, 
+                          image_name=nome_imagem, image_data=imagem_dados)
         except (ValueError, TypeError):
             return "Preço invalido", 400
         return redirect(url_for('home'))
@@ -49,7 +57,30 @@ def delete(id):
         return '', 204
     else:
         return "Erro não funcao"
-    
 
-if __name__ == "__main__":
+@app.route('/edit/<int:id>', methods=['POST'])
+def edit_pizza(id):
+    if request.method == "POST":
+        nome_novo = request.form.get('nome')
+        ingredientes_novo = request.form.get('ingredientes')
+        preco_novo = request.form.get('preco')
+        
+        # Processar a imagem (opcional para edição)
+        imagem_arquivo = request.files.get('imagem')
+        nome_imagem = None
+        imagem_dados = None
+        
+        if imagem_arquivo:
+            nome_imagem = imagem_arquivo.filename
+            imagem_dados = imagem_arquivo.read()
+        
+        try:
+            preco_formatado = float(preco_novo)
+            ct.update_prod(id=id, nome=nome_novo, ingredientes=ingredientes_novo, preco=preco_formatado,
+                          image_name=nome_imagem, image_data=imagem_dados)
+        except (ValueError, TypeError):
+            return "Preço invalido", 400
+        return redirect(url_for('home'))
+    
+if __name__ == '__main__':
     app.run(host="0.0.0.0", port=80 ,debug=True)
