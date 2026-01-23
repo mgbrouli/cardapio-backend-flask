@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações do Cardápio | Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        body { background-color: #f4f7f6; }
+        .config-card { border: none; border-radius: 15px; box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1); }
+        .nav-pills .nav-link.active { background-color: #0d6efd; }
+        .color-preview { height: 45px; border-radius: 8px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            
+            <div class="d-flex align-items-center mb-4">
+                <i class="bi bi-gear-fill fs-2 me-3 text-primary"></i>
+                <div>
+                    <h2 class="mb-0">Painel de Gerenciamento</h2>
+                    <p class="text-muted">Configure a identidade visual e dados da sua empresa</p>
+                </div>
+            </div>
+
+            <div class="card config-card">
+                <div class="card-body p-4">
+                    
+                    <ul class="nav nav-pills mb-4" id="configTabs" role="tablist">
+                        <li class="nav-item">
+                            <button class="nav-link active" id="dados-tab" data-bs-toggle="pill" data-bs-target="#dados">
+                                <i class="bi bi-shop me-2"></i>Dados Gerais
+                            </button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link" id="aparencia-tab" data-bs-toggle="pill" data-bs-target="#aparencia">
+                                <i class="bi bi-palette me-2"></i>Aparência
+                            </button>
+                        </li>
+                    </ul>
+
+                    <form id="menuConfigForm">
+                        <div class="tab-content" id="pills-tabContent">
+                            
+                            <div class="tab-pane fade show active" id="dados">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">Nome do Estabelecimento</label>
+                                        <input type="text" class="form-control" placeholder="Ex: Burguer King" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">CNPJ</label>
+                                        <input type="text" class="form-control" placeholder="00.000.000/0001-00">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Descrição Curta</label>
+                                        <textarea class="form-control" rows="2" placeholder="Ex: O melhor hambúrguer artesanal da região."></textarea>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-bold">WhatsApp para Pedidos</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-success text-white border-0"><i class="bi bi-whatsapp"></i></span>
+                                            <input type="tel" class="form-control" placeholder="5511999999999">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="aparencia">
+                                <div class="row g-4">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold d-block">Cor de Destaque</label>
+                                        <input type="color" class="form-control form-control-color w-100" id="primaryColor" value="#0d6efd">
+                                        <small class="text-muted">Cor dos botões e categorias.</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold d-block">Cor de Fundo</label>
+                                        <input type="color" class="form-control form-control-color w-100" id="bgColor" value="#ffffff">
+                                        <small class="text-muted">Cor principal da tela.</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold d-block">Cor dos Textos</label>
+                                        <input type="color" class="form-control form-control-color w-100" id="textColor" value="#212529">
+                                        <small class="text-muted">Cor da fonte principal.</small>
+                                    </div>
+                                    <div class="col-md-12 border-top pt-3">
+                                        <label class="form-label fw-bold">Link da Imagem de Logotipo</label>
+                                        <input type="url" class="form-control" placeholder="https://exemplo.com/logo.png">
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Banner de Destaque (Fundo)</label>
+                                        <input type="url" class="form-control" placeholder="https://exemplo.com/banner.jpg">
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <button type="button" class="btn btn-outline-secondary">
+                                <i class="bi bi-eye me-2"></i>Ver Prévia
+                            </button>
+                            <button type="submit" class="btn btn-primary px-5 shadow">
+                                <i class="bi bi-check-lg me-2"></i>Salvar Tudo
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <p class="text-center mt-4 text-muted small">ID da Empresa: #123456</p>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
