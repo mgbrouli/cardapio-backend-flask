@@ -96,7 +96,7 @@ def home():
     produtos_com_imagens = ct.get_all_prod_with_images(empresa_id)
     return render_template('home.html', produto=produtos_com_imagens, empresa_id=empresa_id)
 
-@app.route('/add<int:empresa_id>', methods=['POST'])
+@app.route('/add/<int:empresa_id>', methods=['POST'])
 def add_pizza(empresa_id):
     if request.method == "POST":
         nome_novo = request.form.get('nome')
@@ -151,7 +151,9 @@ def edit_pizza(id):
             return "Preço invalido", 400
         return redirect(url_for('home'))
     
+
 @app.route("/config/<int:empresa_id>", methods=["GET", "POST"])
+@login_required
 def config(empresa_id):
     empresa = Empresa.query.get_or_404(empresa_id)
 
