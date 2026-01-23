@@ -82,5 +82,10 @@ def edit_pizza(id):
             return "Preço invalido", 400
         return redirect(url_for('home'))
     
+@app.route("/config/<int:client_id>", methods=["GET", "POST"])
+def config(client_id):
+    if request.method == 'GET':
+        return render_template('config.html')
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=80 ,debug=True)
