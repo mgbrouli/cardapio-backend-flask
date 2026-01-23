@@ -7,23 +7,77 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <title>Cardápio Pizza</title>
+
+    <style>
+        :root {
+            --primary-color: {
+                    {
+                    empresa.primary_color or '#0d6efd'
+                }
+            }
+
+            ;
+
+            --bg-color: {
+                    {
+                    empresa.bg_color or '#f8f9fa'
+                }
+            }
+
+            ;
+
+            --text-color: {
+                    {
+                    empresa.text_color or '#333'
+                }
+            }
+
+            ;
+        }
+
+        body {
+            background-color: var(--bg-color) !important;
+            color: var(--text-color);
+        }
+
+        .bg-dark {
+            background-color: var(--primary-color) !important;
+        }
+
+        .badge.bg-warning {
+            background-color: var(--primary-color) !important;
+            color: white;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
 
 
-    <header class="bg-dark text-white py-4 mb-4 shadow">
+    <header class="bg-dark text-white py-3 mb-4 shadow">
         <div class="container">
-            <div class="d-flex align-items-center justify-content-center gap-3">
-                <img src="{{ url_for('static', filename='img/logo.jpg') }}" alt="Logo" class="rounded-circle"
-                    style="width:56px; height:56px; object-fit:cover;">
-                <div class="text-center">
-                    <h1 class="h4 mb-0">Pizzaria Exemplo</h1>
-                    <small class="text-white-50">Cardápio de Pizzas</small>
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{{ empresa.logo_path or url_for('static', filename='img/default-logo.jpg') }}" alt="Logo"
+                        class="rounded-circle" style="width:56px; height:56px; object-fit:cover;">
+                    <div class="text-center">
+                        <h1 class="h4 mb-0">{{ empresa.name_est }}</h1>
+                        <small class="text-white-50">{{ empresa.short_description or 'Cardápio Digital' }}</small>
+                    </div>
+
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#loginModal">
+                        Entrar
+                    </button>
+                    <button class="btn btn-sm btn-warning fw-bold" data-bs-toggle="modal"
+                        data-bs-target="#cadastroModal">
+                        Criar meu Cardápio
+                    </button>
                 </div>
             </div>
         </div>
-
     </header>
 
     <main class="container">
@@ -58,31 +112,99 @@
         </div>
     </main>
     <div class="modal fade" id="pizzaModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header border-0">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <div class="row align-items-center">
-                    <div class="col-md-6 mb-3 mb-md-0 text-center">
-                        <img src="" id="modalImg" class="img-fluid rounded shadow" style="max-height: 400px; width: 100%; object-fit: cover;">
-                    </div>
-                    <div class="col-md-6">
-                        <h2 id="modalNome" class="fw-bold text-uppercase mb-2"></h2>
-                        <h4 id="modalPreco" class="text-success fw-bold mb-3"></h4>
-                        <hr>
-                        <p class="text-muted mb-1 small text-uppercase fw-bold">Ingredientes:</p>
-                        <p id="modalIngredientes" class="lead fs-6"></p>
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 mb-3 mb-md-0 text-center">
+                            <img src="" id="modalImg" class="img-fluid rounded shadow"
+                                style="max-height: 400px; width: 100%; object-fit: cover;">
+                        </div>
+                        <div class="col-md-6">
+                            <h2 id="modalNome" class="fw-bold text-uppercase mb-2"></h2>
+                            <h4 id="modalPreco" class="text-success fw-bold mb-3"></h4>
+                            <hr>
+                            <p class="text-muted mb-1 small text-uppercase fw-bold">Ingredientes:</p>
+                            <p id="modalIngredientes" class="lead fs-6"></p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer border-0">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
+
+    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Acesse seu Painel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form action="{{ url_for('login') }}" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">E-mail</label>
+                            <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Senha</label>
+                            <input type="password" name="senha" class="form-control" placeholder="••••••••" required>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100 py-2 fw-bold shadow-sm">Entrar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cadastroModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Comece a vender online</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form action="{{ url_for('cadastro') }}" method="POST">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">E-mail Administrativo</label>
+                                <input type="email" name="email" class="form-control" placeholder="exemplo@gmail.com"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Senha de Acesso</label>
+                                <input type="password" name="senha" class="form-control"
+                                    placeholder="Crie uma senha forte" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Nome do Estabelecimento</label>
+                                <input type="text" name="nome_loja" class="form-control"
+                                    placeholder="Ex: Pizzaria do Zé" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">WhatsApp para Pedidos</label>
+                                <input type="tel" name="whatsapp" class="form-control" placeholder="5511999999999"
+                                    required>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <button type="submit" class="btn btn-warning w-100 py-2 fw-bold shadow-sm">
+                                    Criar meu Cardápio Grátis
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const pizzaModal = new bootstrap.Modal(document.getElementById('pizzaModal'));

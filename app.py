@@ -1,9 +1,16 @@
 from flask import Flask, render_template, request, redirect, url_for
-from model import db
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
+from model import Empresa, Usuario, db
 import controller as ct
 import os
 
 app = Flask(__name__)
+
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login' # Redireciona para cá se não estiver logado
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'banco.db')
@@ -14,21 +21,68 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+@app.route('/')
+def landing():
+    # Se o usuário estiver logado, podemos sugerir que ele vá para o painel
+    return render_template('landing.html')
 
-@app.route('/', methods = ['GET'])
-def index():
+@app.route('/<int:empresa_id', methods = ['GET'])
+def index(empresa_id):
     
-    produtos_com_imagens = ct.get_all_prod_with_images()
-    return render_template('index.html', produto=produtos_com_imagens)
+    empresa = Empresa.query.get_or_404(empresa_id)
 
-@app.route('/home', methods = ['GET'])
+    produtos_com_imagens = ct.get_all_prod_with_images(empresa_id)
+    return render_template('index.html', produto=produtos_com_imagens, empresa=empresa)
+
+@login_manager.user_loader
+def loader_user(user_id):
+    return Usuario.query.get(int(user_id))
+
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+        nome_loja = request.form.get('nome_loja')
+        whats = request.form.get('whatsapp')
+
+        # 1. Cria a Empresa primeiro
+        nova_empresa = Empresa(name_est=nome_loja, whatsapp=whats)
+        db.session.add(nova_empresa)
+        db.session.flush() # Gera o ID da empresa sem fechar a transação
+
+        # 2. Cria o Usuário vinculado a essa empresa
+        hash_senha = generate_password_hash(senha)
+        novo_usuario = Usuario(email=email, senha=hash_senha, empresa_id=nova_empresa.id)
+        
+        db.session.add(novo_usuario)
+        db.session.commit()
+        
+        return redirect(url_for('login'))
+    return render_template('cadastro.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+        user = Usuario.query.filter_by(email=email).first()
+
+        if user and check_password_hash(user.senha, senha):
+            login_user(user)
+            return redirect(url_for('home')) # Vai para a home da empresa dele
+    return render_template('login.html')
+
+@app.route('/home')
+@login_required
 def home():
     
-    produtos_com_imagens = ct.get_all_prod_with_images()
-    return render_template('home.html', produto=produtos_com_imagens)
+    empresa_id = current_user.empresa_id
+    produtos_com_imagens = ct.get_all_prod_with_images(empresa_id)
+    return render_template('home.html', produto=produtos_com_imagens, empresa_id=empresa_id)
 
-@app.route('/add', methods=['POST'])
-def add_pizza():
+@app.route('/add<int:empresa_id>', methods=['POST'])
+def add_pizza(empresa_id):
     if request.method == "POST":
         nome_novo = request.form.get('nome')
         ingredientes_novo = request.form.get('ingredientes')
@@ -45,11 +99,11 @@ def add_pizza():
         
         try:
             preco_formatado = float(preco_novo)
-            ct.create_prod(nome=nome_novo, ingredientes=ingredientes_novo, preco=preco_formatado, 
+            ct.create_prod(empresa_id=empresa_id,nome=nome_novo, ingredientes=ingredientes_novo, preco=preco_formatado, 
                           image_name=nome_imagem, image_data=imagem_dados)
         except (ValueError, TypeError):
             return "Preço invalido", 400
-        return redirect(url_for('home'))
+        return redirect(url_for('home', empresa_id=empresa_id))
 
 @app.route('/remove/<int:id>', methods=['DELETE'])
 def delete(id):
@@ -82,10 +136,28 @@ def edit_pizza(id):
             return "Preço invalido", 400
         return redirect(url_for('home'))
     
-@app.route("/config/<int:client_id>", methods=["GET", "POST"])
-def config(client_id):
-    if request.method == 'GET':
-        return render_template('config.html')
+@app.route("/config/<int:empresa_id>", methods=["GET", "POST"])
+def config(empresa_id):
+    empresa = Empresa.query.get_or_404(empresa_id)
+
+    if request.method == 'POST':
+        # Dados Gerais
+        empresa.name_est = request.form.get('nome_est')
+        empresa.whatsapp = request.form.get('whatsapp')
+        empresa.short_description = request.form.get('descricao')
+        
+        # Endereço
+        empresa.logradouro = request.form.get('logradouro')
+        empresa.cidade = request.form.get('cidade')
+        # ... (demais campos)
+
+        # Aparência
+        empresa.primary_color = request.form.get('primary_color')
+
+        db.session.commit()
+        return redirect(url_for('home', empresa_id=empresa.id))
+
+    return render_template('config.html', empresa=empresa)
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=80 ,debug=True)

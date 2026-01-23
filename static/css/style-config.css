@@ -1,98 +1,54 @@
 :root {
-    --primary-color: #4a90e2;
-    --bg-admin: #f8f9fa;
+    --primary-color: #0d6efd; /* Alinhado com o azul do Bootstrap usado no HTML */
+    --bg-admin: #f4f7f6;
     --card-bg: #ffffff;
     --text-color: #333;
+    --success-color: #2ed573;
 }
 
+/* Reset e Estrutura Geral */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-admin);
     color: var(--text-color);
     margin: 0;
-    padding: 20px;
+    padding: 0; /* Bootstrap container já lida com o padding */
 }
 
-.container {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-header {
-    margin-bottom: 30px;
-}
-
-.card {
+/* Cards e Componentes Customizados */
+.config-card {
     background: var(--card-bg);
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
 }
 
 h2 {
-    font-size: 1.2rem;
-    margin-top: 0;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    font-size: 1.5rem;
+    font-weight: 700;
 }
 
-.grid-inputs, .grid-colors {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+h5 {
+    font-size: 1.1rem;
+    color: #444;
+    margin-top: 10px;
 }
 
-.input-group {
-    display: flex;
-    flex-direction: column;
-    margin-top: 15px;
-}
-
+/* Ajustes de Formulário e Input */
 label {
     font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 8px;
 }
 
-input[type="text"], input[type="url"], input[type="tel"] {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+/* Corrigindo conflito com Bootstrap: 
+   Não redeclara .input-group como flex-column, 
+   pois o Bootstrap usa para alinhar o ícone lateralmente */
+.input-group-text {
+    border-radius: 6px 0 0 6px !important;
 }
 
-input[type="color"] {
-    width: 100%;
-    height: 40px;
-    border: none;
-    cursor: pointer;
-}
-
-.actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 30px;
-}
-
-.btn-primary {
-    background-color: #2ed573;
-    color: white;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.btn-secondary {
-    background-color: #e2e2e2;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-/* Estilização dos campos de Upload */
+/* Campos de Upload de Imagem */
 .upload-container {
     border: 2px dashed #ddd;
     border-radius: 12px;
@@ -101,12 +57,10 @@ input[type="color"] {
     background: #fdfdfd;
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
 .upload-container:hover {
-    border-color: #0d6efd;
+    border-color: var(--primary-color);
     background-color: #f0f7ff;
 }
 
@@ -128,4 +82,28 @@ input[type="color"] {
     max-height: 150px;
     width: 100%;
     object-fit: cover;
+}
+
+/* Inputs de Cor */
+input[type="color"] {
+    height: 45px;
+    cursor: pointer;
+}
+
+/* Botões Customizados */
+.btn-primary {
+    background-color: var(--primary-color);
+    border: none;
+    transition: opacity 0.2s;
+}
+
+.btn-primary:hover {
+    opacity: 0.9;
+    background-color: var(--primary-color);
+}
+
+.btn-save-custom { /* Se quiser usar a cor verde do seu CSS anterior */
+    background-color: var(--success-color) !important;
+    border: none;
+    color: white;
 }

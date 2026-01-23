@@ -1,14 +1,14 @@
 from model import db, Produtos, Imagens
 import base64
 
-def create_prod(nome, ingredientes, preco, image_name=None, image_data=None):
+def create_prod(empresa_id ,nome, ingredientes, preco, image_name=None, image_data=None):
 
-    novo_produto = Produtos(nome=nome, ingredientes=ingredientes, preco=preco)
+    novo_produto = Produtos(nome=nome, ingredientes=ingredientes, preco=preco, empresa_id=empresa_id)
     db.session.add(novo_produto)
     db.session.commit()
 
     if image_data is not None and image_name is not None:
-        nova_imagem = Imagens(produto_id=novo_produto.id, name=image_name, image=image_data)
+        nova_imagem = Imagens(produto_id=novo_produto.id, empresa_id=empresa_id, name=image_name, image=image_data)
         db.session.add(nova_imagem)
         db.session.commit()
 
@@ -19,13 +19,13 @@ def get_all_prod():
 
     return lista_produto
 
-def get_all_prod_with_images():
+def get_all_prod_with_images(empresa_id):
     """Retorna todos os produtos com suas imagens associadas"""
-    produtos = Produtos.query.all()
+    produtos = Produtos.query.filter_by(empresa_id).all()
     resultado = []
     
     for produto in produtos:
-        imagem = Imagens.query.filter_by(produto_id=produto.id).first()
+        imagem = Imagens.query.filter_by(produto_id=produto.id, empresa_id=empresa_id).first()
 
         img_base64 = None
         if imagem and imagem.image:
