@@ -12,6 +12,9 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login' # Redireciona para cá se não estiver logado
 
+
+app.config['SECRET_KEY'] = 'uma-chave-muito-segura-e-secreta-123'
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'banco.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -26,10 +29,13 @@ def landing():
     # Se o usuário estiver logado, podemos sugerir que ele vá para o painel
     return render_template('landing.html')
 
-@app.route('/<int:empresa_id', methods = ['GET'])
+@app.route('/<int:empresa_id>', methods = ['GET'])
 def index(empresa_id):
     
     empresa = Empresa.query.get_or_404(empresa_id)
+
+    if not empresa.ativo:
+        return "Este cardápio está temporariamente suspenso. Entre em contato com o administrador.", 403
 
     produtos_com_imagens = ct.get_all_prod_with_images(empresa_id)
     return render_template('index.html', produto=produtos_com_imagens, empresa=empresa)
@@ -46,19 +52,28 @@ def cadastro():
         nome_loja = request.form.get('nome_loja')
         whats = request.form.get('whatsapp')
 
+        usuario_existente = Usuario.query.filter_by(email=email).first()
+        if usuario_existente:
+            # Aqui você pode usar Flash Messages ou apenas retornar um erro
+            return "Este e-mail já está cadastrado. Tente fazer login.", 400
+        try:
         # 1. Cria a Empresa primeiro
-        nova_empresa = Empresa(name_est=nome_loja, whatsapp=whats)
-        db.session.add(nova_empresa)
-        db.session.flush() # Gera o ID da empresa sem fechar a transação
+            nova_empresa = Empresa(name_est=nome_loja, whatsapp=whats)
+            db.session.add(nova_empresa)
+            db.session.flush() # Gera o ID da empresa sem fechar a transação
 
-        # 2. Cria o Usuário vinculado a essa empresa
-        hash_senha = generate_password_hash(senha)
-        novo_usuario = Usuario(email=email, senha=hash_senha, empresa_id=nova_empresa.id)
+            # 2. Cria o Usuário vinculado a essa empresa
+            hash_senha = generate_password_hash(senha)
+            novo_usuario = Usuario(email=email, senha=hash_senha, empresa_id=nova_empresa.id)
+            
+            db.session.add(novo_usuario)
+            db.session.commit()
         
-        db.session.add(novo_usuario)
-        db.session.commit()
-        
-        return redirect(url_for('login'))
+            return redirect(url_for('landing'))
+        except Exception as e:
+            db.session.rollback()
+            return f"Erro ao cadastrar: {str(e)}", 500
+
     return render_template('cadastro.html')
 
 @app.route('/login', methods=['GET', 'POST'])

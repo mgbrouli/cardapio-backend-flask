@@ -21,7 +21,7 @@ def get_all_prod():
 
 def get_all_prod_with_images(empresa_id):
     """Retorna todos os produtos com suas imagens associadas"""
-    produtos = Produtos.query.filter_by(empresa_id).all()
+    produtos = Produtos.query.filter_by(empresa_id=empresa_id).all()
     resultado = []
     
     for produto in produtos:

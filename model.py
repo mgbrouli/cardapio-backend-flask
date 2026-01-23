@@ -48,6 +48,9 @@ class Empresa(db.Model):
     produtos = db.relationship('Produtos', backref='empresa', lazy=True)
     imagens = db.relationship('Imagens', backref='empresa', lazy=True)
 
+    plano = db.Column(db.String(20), default='gratis') # gratis, pro, premium
+    ativo = db.Column(db.Boolean, default=True) # Para desativar se não pagar
+
     def __repr__(self):
         return f'<Empresa {self.name_est}>'
     

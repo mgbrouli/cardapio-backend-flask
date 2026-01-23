@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio Digital Pro - Seu negócio no próximo nível</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root { --primary-blue: #0d6efd; --dark-blue: #002d72; }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            color: white;
+            padding: 120px 0 80px;
+            clip-path: ellipse(100% 100% at 50% 0%);
+        }
+
+        .pricing-card {
+            border: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 1rem 3rem rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .nav-link { font-weight: 500; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">
+                <i class="bi bi-qr-code-scan me-2"></i>MENU PRO
+            </a>
+            <div class="d-flex gap-2">
+                <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#loginModal">Entrar</button>
+                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#cadastroModal">Cadastrar</button>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-3 fw-bold mb-3">Venda mais pelo WhatsApp</h1>
+            <p class="lead mb-5 opacity-75">Crie seu cardápio digital em minutos, aceite pedidos organizados e modernize seu atendimento.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <button class="btn btn-warning btn-lg fw-bold px-4 shadow" data-bs-toggle="modal" data-bs-target="#cadastroModal">Começar Agora Grátis</button>
+                <a href="#planos" class="btn btn-outline-light btn-lg px-4">Ver Planos</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="py-5">
+        <div class="container text-center py-5">
+            <h2 class="fw-bold mb-5">Como funciona?</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <i class="bi bi-pencil-square feature-icon"></i>
+                    <h4>1. Cadastre seu Menu</h4>
+                    <p class="text-muted">Adicione suas pizzas, preços e fotos de forma simples pelo painel administrativo.</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="bi bi-share feature-icon"></i>
+                    <h4>2. Divulgue o Link</h4>
+                    <p class="text-muted">Coloque o seu link exclusivo na bio do Instagram e no seu perfil do WhatsApp.</p>
+                </div>
+                <div class="col-md-4">
+                    <i class="bi bi-whatsapp feature-icon"></i>
+                    <h4>3. Receba Pedidos</h4>
+                    <p class="text-muted">Seu cliente escolhe os produtos e o pedido chega pronto e detalhado no seu WhatsApp.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    
+    <section id="planos" class="py-5 bg-light">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Preços Transparentes</h2>
+                <p class="text-muted">Escolha o plano que melhor atende o seu volume de vendas.</p>
+            </div>
+            
+            <div class="row g-4 justify-content-center">
+                <div class="col-md-5 col-lg-4">
+                    <div class="card h-100 pricing-card p-4 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="h5 fw-bold text-muted">START</h3>
+                            <h4 class="display-6 fw-bold mb-4">R$ 0<small class="fs-6 text-muted">/sempre</small></h4>
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Até 10 Produtos</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Link Personalizado</li>
+                                <li class="mb-2 text-muted"><i class="bi bi-x-circle-fill text-danger me-2"></i> Sem Logo Customizada</li>
+                                <li class="mb-2 text-muted"><i class="bi bi-x-circle-fill text-danger me-2"></i> Suporte via E-mail</li>
+                            </ul>
+                            <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#cadastroModal">Criar Grátis</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-5 col-lg-4">
+                    <div class="card h-100 pricing-card p-4 shadow border-primary border-2">
+                        <div class="card-body">
+                            <div class="badge bg-primary mb-2">MAIS VENDIDO</div>
+                            <h3 class="h5 fw-bold">PRO</h3>
+                            <h4 class="display-6 fw-bold mb-4">R$ 49<small class="fs-6 text-muted">/mês</small></h4>
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Produtos Ilimitados</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Logo e Cores Próprias</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Banner de Destaque</li>
+                                <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i> Suporte WhatsApp</li>
+                            </ul>
+                            <button class="btn btn-primary w-100 shadow" data-bs-toggle="modal" data-bs-target="#cadastroModal">Assinar Agora</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white py-4 text-center">
+        <div class="container">
+            <p class="mb-0 small">© 2024 Menu Pro - Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    {% include 'includes/_modais.html' %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
