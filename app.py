@@ -93,8 +93,9 @@ def login():
 def home():
     
     empresa_id = current_user.empresa_id
+    empresa = Empresa.query.get_or_404(empresa_id)
     produtos_com_imagens = ct.get_all_prod_with_images(empresa_id)
-    return render_template('home.html', produto=produtos_com_imagens, empresa_id=empresa_id)
+    return render_template('home.html', produto=produtos_com_imagens, empresa=empresa)
 
 @app.route('/add/<int:empresa_id>', methods=['POST'])
 def add_pizza(empresa_id):
@@ -155,24 +156,71 @@ def edit_pizza(id):
 @app.route("/config/<int:empresa_id>", methods=["GET", "POST"])
 @login_required
 def config(empresa_id):
+    # Validar se o usuário logado é o dono da empresa
+    if current_user.empresa_id != empresa_id:
+        return "Acesso negado", 403
+    
     empresa = Empresa.query.get_or_404(empresa_id)
 
     if request.method == 'POST':
         # Dados Gerais
-        empresa.name_est = request.form.get('nome_est')
-        empresa.whatsapp = request.form.get('whatsapp')
-        empresa.short_description = request.form.get('descricao')
+        empresa.name_est = request.form.get('nome_est', empresa.name_est)
+        empresa.cnpj_est = request.form.get('cnpj_est', empresa.cnpj_est)
+        empresa.whatsapp = request.form.get('whatsapp', empresa.whatsapp)
+        empresa.short_description = request.form.get('short_description', empresa.short_description)
         
         # Endereço
-        empresa.logradouro = request.form.get('logradouro')
-        empresa.cidade = request.form.get('cidade')
-        # ... (demais campos)
+        empresa.logradouro = request.form.get('logradouro', empresa.logradouro)
+        empresa.bairro = request.form.get('bairro', empresa.bairro)
+        empresa.cidade = request.form.get('cidade', empresa.cidade)
+        empresa.estado = request.form.get('estado', empresa.estado)
+        empresa.cep = request.form.get('cep', empresa.cep)
+        
+        # Aparência (Cores)
+        primary_color = request.form.get('primary_color')
+        if primary_color:
+            empresa.primary_color = primary_color
+        
+        bg_color = request.form.get('bg_color')
+        if bg_color:
+            empresa.bg_color = bg_color
+        
+        text_color = request.form.get('text_color')
+        if text_color:
+            empresa.text_color = text_color
 
-        # Aparência
-        empresa.primary_color = request.form.get('primary_color')
+        # Processar Logo
+        logo_file = request.files.get('logo_file')
+        if logo_file and logo_file.filename != '':
+            uploads_dir = os.path.join(basedir, 'static', 'uploads')
+            os.makedirs(uploads_dir, exist_ok=True)
+            
+            # Gerar nome único
+            import time
+            logo_filename = f'logo_{empresa_id}_{int(time.time())}_{logo_file.filename}'
+            logo_path = os.path.join(uploads_dir, logo_filename)
+            logo_file.save(logo_path)
+            empresa.logo_path = url_for('static', filename=f'uploads/{logo_filename}')
 
-        db.session.commit()
-        return redirect(url_for('home', empresa_id=empresa.id))
+        # Processar Banner
+        banner_file = request.files.get('banner_file')
+        if banner_file and banner_file.filename != '':
+            uploads_dir = os.path.join(basedir, 'static', 'uploads')
+            os.makedirs(uploads_dir, exist_ok=True)
+            
+            # Gerar nome único
+            import time
+            banner_filename = f'banner_{empresa_id}_{int(time.time())}_{banner_file.filename}'
+            banner_path = os.path.join(uploads_dir, banner_filename)
+            banner_file.save(banner_path)
+            empresa.banner_path = url_for('static', filename=f'uploads/{banner_filename}')
+
+        try:
+            db.session.commit()
+            return redirect(url_for('home'))
+        except Exception as e:
+            db.session.rollback()
+            return f"Erro ao salvar: {str(e)}", 500
 
     return render_template('config.html', empresa=empresa)
 

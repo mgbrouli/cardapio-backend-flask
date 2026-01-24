@@ -63,32 +63,65 @@
                             </li>
                         </ul>
 
-                        <form id="menuConfigForm">
+                        <form id="menuConfigForm" method="POST" enctype="multipart/form-data" action="{{ url_for('config', empresa_id=empresa.id) }}">
                             <div class="tab-content" id="pills-tabContent">
 
                                 <div class="tab-pane fade show active" id="dados">
                                     <div class="row g-3">
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Nome do Estabelecimento</label>
-                                            <input type="text" class="form-control" placeholder="Ex: Burguer King"
-                                                required>
+                                            <input type="text" class="form-control" name="nome_est" placeholder="Ex: Burguer King"
+                                                value="{{ empresa.name_est or '' }}" required>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">CNPJ</label>
-                                            <input type="text" class="form-control" placeholder="00.000.000/0001-00">
+                                            <input type="text" class="form-control" name="cnpj_est" placeholder="00.000.000/0001-00"
+                                                value="{{ empresa.cnpj_est or '' }}">
                                         </div>
                                         <div class="col-md-12">
                                             <label class="form-label fw-bold">Descrição Curta</label>
-                                            <textarea class="form-control" rows="2"
-                                                placeholder="Ex: O melhor hambúrguer artesanal da região."></textarea>
+                                            <textarea class="form-control" name="short_description" rows="2"
+                                                placeholder="Ex: O melhor hambúrguer artesanal da região.">{{ empresa.short_description or '' }}</textarea>
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">WhatsApp para Pedidos</label>
                                             <div class="input-group">
                                                 <span class="input-group-text bg-success text-white border-0"><i
                                                         class="bi bi-whatsapp"></i></span>
-                                                <input type="tel" class="form-control" placeholder="5511999999999">
+                                                <input type="tel" class="form-control" name="whatsapp" placeholder="5511999999999"
+                                                    value="{{ empresa.whatsapp or '' }}">
                                             </div>
+                                        </div>
+
+                                        <hr class="my-3">
+                                        <div class="col-12">
+                                            <h5 class="fw-bold text-primary"><i class="bi bi-geo-alt me-2"></i>Endereço</h5>
+                                        </div>
+
+                                        <div class="col-md-8">
+                                            <label class="form-label fw-bold">Logradouro</label>
+                                            <input type="text" class="form-control" name="logradouro" placeholder="Ex: Rua das Flores, 123"
+                                                value="{{ empresa.logradouro or '' }}">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">Bairro</label>
+                                            <input type="text" class="form-control" name="bairro" placeholder="Ex: Centro"
+                                                value="{{ empresa.bairro or '' }}">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">Cidade</label>
+                                            <input type="text" class="form-control" name="cidade" placeholder="Ex: São Paulo"
+                                                value="{{ empresa.cidade or '' }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">Estado</label>
+                                            <input type="text" class="form-control" name="estado" placeholder="SP" maxlength="2"
+                                                value="{{ empresa.estado or '' }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label fw-bold">CEP</label>
+                                            <input type="text" class="form-control" name="cep" placeholder="00000-000"
+                                                value="{{ empresa.cep or '' }}">
                                         </div>
                                     </div>
                                 </div>
@@ -98,17 +131,17 @@
                                         <div class="col-md-4">
                                             <label class="form-label fw-bold d-block">Cor de Destaque</label>
                                             <input type="color" class="form-control form-control-color w-100"
-                                                id="primaryColor" value="#0d6efd">
+                                                id="primaryColor" name="primary_color" value="{{ empresa.primary_color or '#0d6efd' }}">
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label fw-bold d-block">Cor de Fundo</label>
                                             <input type="color" class="form-control form-control-color w-100"
-                                                id="bgColor" value="#ffffff">
+                                                id="bgColor" name="bg_color" value="{{ empresa.bg_color or '#ffffff' }}">
                                         </div>
                                         <div class="col-md-4">
                                             <label class="form-label fw-bold d-block">Cor dos Textos</label>
                                             <input type="color" class="form-control form-control-color w-100"
-                                                id="textColor" value="#212529">
+                                                id="textColor" name="text_color" value="{{ empresa.text_color or '#212529' }}">
                                         </div>
 
                                         <div class="col-md-12 border-top pt-3">
@@ -116,10 +149,15 @@
                                             <div class="upload-container"
                                                 onclick="document.getElementById('logoInput').click()">
                                                 <div id="logoPreview" class="image-preview-box">
-                                                    <i class="bi bi-cloud-arrow-up fs-2"></i>
-                                                    <span>Clique para enviar o Logotipo</span>
+                                                    {% if empresa.logo_path %}
+                                                        <img src="{{ empresa.logo_path }}" class="img-fluid mb-2">
+                                                        <p class="mb-0 small text-primary"><i class="bi bi-arrow-repeat"></i> Clique para alterar</p>
+                                                    {% else %}
+                                                        <i class="bi bi-cloud-arrow-up fs-2"></i>
+                                                        <span>Clique para enviar o Logotipo</span>
+                                                    {% endif %}
                                                 </div>
-                                                <input type="file" id="logoInput" name="logo" hidden accept="image/*"
+                                                <input type="file" id="logoInput" name="logo_file" hidden accept="image/*"
                                                     onchange="previewImage(this, 'logoPreview')">
                                             </div>
                                         </div>
@@ -129,10 +167,15 @@
                                             <div class="upload-container"
                                                 onclick="document.getElementById('bannerInput').click()">
                                                 <div id="bannerPreview" class="image-preview-box banner-box">
-                                                    <i class="bi bi-image fs-2"></i>
-                                                    <span>Clique para enviar o Banner</span>
+                                                    {% if empresa.banner_path %}
+                                                        <img src="{{ empresa.banner_path }}" class="img-fluid mb-2">
+                                                        <p class="mb-0 small text-primary"><i class="bi bi-arrow-repeat"></i> Clique para alterar</p>
+                                                    {% else %}
+                                                        <i class="bi bi-image fs-2"></i>
+                                                        <span>Clique para enviar o Banner</span>
+                                                    {% endif %}
                                                 </div>
-                                                <input type="file" id="bannerInput" name="banner" hidden
+                                                <input type="file" id="bannerInput" name="banner_file" hidden
                                                     accept="image/*" onchange="previewImage(this, 'bannerPreview')">
                                             </div>
                                         </div>
@@ -156,7 +199,7 @@
                     </div>
                 </div>
 
-                <p class="text-center mt-4 text-muted small">ID da Empresa: #123456</p>
+                <p class="text-center mt-4 text-muted small">ID da Empresa: #{{ empresa.id }}</p>
             </div>
         </div>
     </div>
