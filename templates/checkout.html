@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgrade para Premium | {{ empresa.name_est }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-blue: #0d6efd;
+            --dark-blue: #002d72;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            color: white;
+            padding: 80px 0 60px;
+        }
+
+        .pricing-card {
+            border: none;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .pricing-card.selected {
+            transform: scale(1.05);
+            box-shadow: 0 2rem 3rem rgba(13, 110, 253, 0.3);
+            border: 3px solid var(--primary-blue);
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-list .check {
+            color: #28a745;
+            margin-right: 0.5rem;
+        }
+
+        .feature-list .times {
+            color: #dc3545;
+            margin-right: 0.5rem;
+        }
+
+        .summary-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-upgrade {
+            font-size: 1.2rem;
+            padding: 0.8rem 2rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="hero-section text-center">
+        <div class="container">
+            <a href="{{ url_for('empresa.home') }}" class="btn btn-outline-light btn-sm mb-4">
+                <i class="bi bi-arrow-left me-2"></i>Voltar ao Painel
+            </a>
+            <h1 class="display-4 fw-bold mb-3">Upgrade para Premium</h1>
+            <p class="lead opacity-75">Escolha o plano que melhor se adapta às suas necessidades</p>
+        </div>
+    </header>
+
+    <main class="container py-5">
+        <div class="row g-4 justify-content-center mb-5">
+            <!-- Plano Free -->
+            <div class="col-md-5 col-lg-4">
+                <div class="card pricing-card p-4 shadow-sm selected-plan" data-plan="gratis">
+                    <div class="card-body">
+                        <h3 class="h5 fw-bold text-muted">START</h3>
+                        <h4 class="display-6 fw-bold mb-4">R$ 0
+                            <small class="fs-6 text-muted">/sempre</small>
+                        </h4>
+                        <ul class="feature-list mb-4">
+                            <li><i class="bi bi-check-circle-fill check"></i> Até 10 Produtos</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Link Personalizado</li>
+                            <li><i class="bi bi-x-circle-fill times"></i> Logo Customizada</li>
+                            <li><i class="bi bi-x-circle-fill times"></i> Banner de Destaque</li>
+                            <li><i class="bi bi-x-circle-fill times"></i> Suporte por WhatsApp</li>
+                        </ul>
+                        <button type="button" class="btn btn-outline-primary w-100 plan-selector" data-plan="gratis" disabled>
+                            Plano Atual
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plano Pro -->
+            <div class="col-md-5 col-lg-4">
+                <div class="card pricing-card p-4 shadow border-primary border-2" data-plan="pro">
+                    <div class="position-absolute top-0 start-50 translate-middle-x">
+                        <span class="badge bg-primary" style="margin-top: -12px;">MAIS POPULAR</span>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="h5 fw-bold">PRO</h3>
+                        <h4 class="display-6 fw-bold mb-4">R$ 49
+                            <small class="fs-6 text-muted">/mês</small>
+                        </h4>
+                        <ul class="feature-list mb-4">
+                            <li><i class="bi bi-check-circle-fill check"></i> Produtos Ilimitados</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Logo Customizada</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Banner de Destaque</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Suporte por WhatsApp</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Relatórios Básicos</li>
+                        </ul>
+                        <button type="button" class="btn btn-primary w-100 plan-selector" data-plan="pro">
+                            Escolher Plano
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plano Premium -->
+            <div class="col-md-5 col-lg-4">
+                <div class="card pricing-card p-4 shadow" data-plan="premium">
+                    <div class="position-absolute top-0 start-50 translate-middle-x">
+                        <span class="badge bg-warning text-dark" style="margin-top: -12px;">MAIS COMPLETO</span>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="h5 fw-bold">PREMIUM</h3>
+                        <h4 class="display-6 fw-bold mb-4">R$ 99
+                            <small class="fs-6 text-muted">/mês</small>
+                        </h4>
+                        <ul class="feature-list mb-4">
+                            <li><i class="bi bi-check-circle-fill check"></i> Tudo do plano Pro</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Integração com Stripe</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Estatísticas Avançadas</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Suporte Prioritário 24/7</li>
+                            <li><i class="bi bi-check-circle-fill check"></i> Domain Customizado</li>
+                        </ul>
+                        <button type="button" class="btn btn-warning w-100 plan-selector" data-plan="premium">
+                            Escolher Plano
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resumo do Pedido -->
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="summary-card">
+                    <h4 class="fw-bold mb-3">Resumo do Pedido</h4>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Empresa:</span>
+                        <strong>{{ empresa.name_est }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Plano Selecionado:</span>
+                        <strong id="selectedPlanName">Nenhum</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Valor:</span>
+                        <strong id="selectedPlanPrice">R$ 0,00</strong>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fw-bold">Total:</span>
+                        <strong class="fs-5" id="selectedPlanTotal">R$ 0,00</strong>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('empresa.subscribe', empresa_id=empresa.id) }}">
+                        <input type="hidden" id="planInput" name="plano" value="">
+                        <button type="submit" class="btn btn-success btn-upgrade w-100" id="confirmBtn" disabled>
+                            <i class="bi bi-check-lg me-2"></i>Confirmar Assinatura
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const planos = {
+            gratis: { nome: 'START', preco: 'R$ 0,00' },
+            pro: { nome: 'PRO', preco: 'R$ 49,00' },
+            premium: { nome: 'PREMIUM', preco: 'R$ 99,00' }
+        };
+
+        document.querySelectorAll('.plan-selector').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const plano = this.getAttribute('data-plan');
+                
+                // Remover seleção anterior
+                document.querySelectorAll('.pricing-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                // Adicionar seleção atual
+                this.closest('.pricing-card').classList.add('selected');
+                
+                // Atualizar resumo
+                document.getElementById('selectedPlanName').textContent = planos[plano].nome;
+                document.getElementById('selectedPlanPrice').textContent = planos[plano].preco;
+                document.getElementById('selectedPlanTotal').textContent = planos[plano].preco;
+                document.getElementById('planInput').value = plano;
+                
+                // Habilitar botão de confirmação
+                document.getElementById('confirmBtn').disabled = false;
+            });
+        });
+    </script>
+</body>
+
+</html>

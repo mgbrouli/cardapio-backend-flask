@@ -25,6 +25,37 @@ def home():
     return render_template('home.html', produto=produtos_com_imagens, empresa=empresa)
 
 
+@empresa_bp.route('/subscribe/<int:empresa_id>', methods=['GET', 'POST'])
+@login_required
+def subscribe(empresa_id):
+    """Rota de assinatura/checkout.
+
+    GET: mostra página de seleção de planos e checkout.
+    POST: efetua o 'upgrade' para o plano selecionado.
+    """
+    if current_user.empresa_id != empresa_id:
+        return "Acesso negado", 403
+
+    empresa = empresa_service.obter_empresa(empresa_id)
+    if not empresa:
+        return "Empresa não encontrada", 404
+
+    if request.method == 'POST':
+        plano = request.form.get('plano', 'pro')
+        # Validar plano
+        if plano not in ['gratis', 'pro', 'premium']:
+            plano = 'pro'
+        
+        # Atualizar plano da empresa
+        empresa.plano = plano
+        empresa_service.empresa_repo.update(empresa)
+        
+        return redirect(url_for('empresa.home'))
+
+    # GET: mostra página de checkout
+    return render_template('checkout.html', empresa=empresa)
+
+
 @empresa_bp.route("/config/<int:empresa_id>", methods=["GET", "POST"])
 @login_required
 def config(empresa_id):

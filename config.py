@@ -36,10 +36,6 @@ class ProductionConfig(Config):
     """Configurações de produção"""
     DEBUG = False
     TESTING = False
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    
-    if not SECRET_KEY:
-        raise ValueError("A variável de ambiente SECRET_KEY não foi definida")
 
 
 class TestingConfig(Config):

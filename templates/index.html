@@ -128,7 +128,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form action="{{ url_for('login') }}" method="POST">
+                    <form action="{{ url_for('auth.login') }}" method="POST">
                         <div class="mb-3">
                             <label class="form-label fw-bold">E-mail</label>
                             <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
@@ -152,7 +152,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body p-4">
-                    <form action="{{ url_for('cadastro') }}" method="POST">
+                    <form action="{{ url_for('auth.cadastro') }}" method="POST">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold">E-mail Administrativo</label>

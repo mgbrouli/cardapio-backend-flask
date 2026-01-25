@@ -63,7 +63,8 @@ class EmpresaService:
             if 'banner_path' in dados:
                 empresa.banner_path = dados['banner_path']
             
-            self.empresa_repo.update(empresa, **{})
+            # Fazer commit das alterações
+            self.empresa_repo.update(empresa)
             
             return {'success': True, 'message': 'Configurações atualizadas com sucesso'}
         
@@ -89,3 +90,16 @@ class EmpresaService:
         
         except Exception as e:
             raise Exception(f'Erro ao processar arquivo: {str(e)}')
+
+    def assinar_empresa(self, empresa_id):
+        """Marca a empresa como assinante premium (placeholder)."""
+        try:
+            empresa = self.empresa_repo.get_by_id(empresa_id)
+            if not empresa:
+                return {'success': False, 'message': 'Empresa não encontrada'}
+
+            empresa.plano = 'premium'
+            self.empresa_repo.update(empresa)
+            return {'success': True, 'message': 'Empresa atualizada para Premium'}
+        except Exception as e:
+            return {'success': False, 'message': f'Erro ao assinar: {str(e)}'}

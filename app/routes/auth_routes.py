@@ -30,9 +30,13 @@ def cadastro():
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """Login do usuário"""
+    erro = None
+    email_enviado = None
+    
     if request.method == 'POST':
         email = request.form.get('email')
         senha = request.form.get('senha')
+        email_enviado = email
         
         resultado = auth_service.validar_credenciais(email, senha)
         
@@ -40,9 +44,9 @@ def login():
             login_user(resultado['usuario'])
             return redirect(url_for('empresa.home'))
         else:
-            return resultado['message'], 400
+            erro = resultado['message']
     
-    return render_template('landing.html')
+    return render_template('landing.html', erro_login=erro, email_login=email_enviado)
 
 
 @auth_bp.route('/logout')

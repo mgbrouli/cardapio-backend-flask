@@ -28,7 +28,12 @@ class BaseRepository:
         return self.model.query.all()
     
     def update(self, entity, **kwargs):
-        """Atualiza uma entidade"""
+        """Atualiza uma entidade
+        
+        Pode ser chamado de duas formas:
+        1. update(entity, field1=value1, field2=value2, ...) - atualiza campos específicos
+        2. update(entity) - apenas faz commit das mudanças já feitas no objeto
+        """
         try:
             for key, value in kwargs.items():
                 if hasattr(entity, key):

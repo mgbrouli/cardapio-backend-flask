@@ -3,13 +3,19 @@
         <div class="modal-content border-0 shadow">
             <div class="modal-header border-0">
                 <h5 class="modal-title fw-bold">Acesse seu Painel</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" {% if erro_login %}disabled{% endif %}></button>
             </div>
             <div class="modal-body p-4">
-                <form action="{{ url_for('login') }}" method="POST">
+                {% if erro_login %}
+                <div class="alert alert-danger fade show mb-3" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <strong>Erro:</strong> {{ erro_login }}
+                </div>
+                {% endif %}
+                <form action="{{ url_for('auth.login') }}" method="POST">
                     <div class="mb-3">
                         <label class="form-label fw-bold">E-mail</label>
-                        <input type="email" name="email" class="form-control" placeholder="seu@email.com" required>
+                        <input type="email" name="email" class="form-control" placeholder="seu@email.com" value="{{ email_login or '' }}" required>
                     </div>
                     <div class="mb-4">
                         <label class="form-label fw-bold">Senha</label>
@@ -22,6 +28,19 @@
     </div>
 </div>
 
+<script>
+// Abrir modal de login automaticamente se houver erro
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.querySelectorAll('#loginModal .alert-danger').length > 0) {
+        const loginModal = new bootstrap.Modal(document.getElementById('loginModal'), {
+            backdrop: 'static',
+            keyboard: false
+        });
+        loginModal.show();
+    }
+});
+</script>
+
 <div class="modal fade" id="cadastroModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 shadow">
@@ -30,7 +49,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <form action="{{ url_for('cadastro') }}" method="POST">
+                <form action="{{ url_for('auth.cadastro') }}" method="POST">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">E-mail Administrativo</label>
