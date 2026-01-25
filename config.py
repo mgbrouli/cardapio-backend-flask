@@ -1,6 +1,10 @@
 """Arquivo de configuração da aplicação"""
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
+
+# Carregar variáveis de ambiente do arquivo .env
+load_dotenv()
 
 # Diretório base
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -24,6 +28,14 @@ class Config:
     
     # Flask-Login
     REMEMBER_COOKIE_DURATION = timedelta(days=7)
+    
+    # Asaas - Integração de Pagamentos (desativado por enquanto)
+    ASAAS_API_KEY = os.environ.get('ASAAS_API_KEY', '')
+    ASAAS_SANDBOX = os.environ.get('ASAAS_SANDBOX', 'True').lower() == 'true'
+    # ASAAS_BASE_URL será definida no __init__ da aplicação quando necessário
+    
+    # Webhook
+    WEBHOOK_SECRET = os.environ.get('WEBHOOK_SECRET', '')
 
 
 class DevelopmentConfig(Config):

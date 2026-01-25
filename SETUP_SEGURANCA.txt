@@ -1,0 +1,91 @@
+```
+📁 CONFIGURAÇÃO DE SEGURANÇA - ESTRUTURA DE ARQUIVOS
+═══════════════════════════════════════════════════════
+
+cardapio-backend-flask/
+│
+├── 🔐 .env                          [NOVO] Arquivo sensível com credenciais
+│   └─ Contém: API keys, senhas, configurações
+│   └─ ⚠️  NUNCA faça commit deste arquivo!
+│   └─ Já está no .gitignore
+│
+├── 📋 .env.example                  [NOVO] Template para documentação
+│   └─ Mostra quais variáveis são necessárias
+│   └─ Use como referência
+│   └─ SEGURO fazer commit
+│
+├── 📚 CONFIGURACAO_ENV.md           [NOVO] Guia de setup
+│   └─ Instruções passo a passo
+│   └─ Explicação de cada variável
+│   └─ Dicas de segurança
+│
+├── 📚 GUIA_ENV_ASAAS.md             [NOVO] Guia de uso
+│   └─ Como usar AsaasService
+│   └─ Exemplos de código
+│   └─ Métodos disponíveis
+│
+├── ✅ verificar_config.py            [NOVO] Script de validação
+│   └─ Testa se tudo está configurado
+│   └─ Valida chaves de API
+│   └─ Dá feedback visual
+│
+├── config.py                        [ATUALIZADO] Agora carrega variáveis de ambiente
+│   └─ import do python-dotenv
+│   └─ Variáveis Asaas configuradas
+│   └─ URL base do Asaas (sandbox ou produção)
+│
+├── requirements.txt                 [ATUALIZADO] Dependências adicionadas
+│   └─ python-dotenv==1.0.0
+│   └─ requests==2.31.0
+│
+└── app/
+    └── services/
+        └── asaas_service.py         [NOVO] Serviço de integração Asaas
+            └─ criar_cliente()
+            └─ criar_pagamento()
+            └─ obter_pagamento()
+            └─ listar_pagamentos()
+            └─ validar_chave_api()
+```
+
+═══════════════════════════════════════════════════════
+🎯 CHAVE ASAAS CONFIGURADA
+═══════════════════════════════════════════════════════
+
+✅ Chave: a2739f88-777d-4c85-96b6-b6f18f2e440e
+✅ Ambiente: Sandbox (Testes)
+✅ Arquivo: .env
+
+═══════════════════════════════════════════════════════
+🚀 PRÓXIMOS PASSOS
+═══════════════════════════════════════════════════════
+
+1. Validar configuração:
+   python verificar_config.py
+
+2. Ler documentação:
+   - CONFIGURACAO_ENV.md (setup)
+   - GUIA_ENV_ASAAS.md (uso)
+
+3. Criar rotas de pagamento:
+   - POST /empresa/pagamento
+   - GET /webhook/asaas
+
+4. Fazer deploy:
+   - Configure variáveis no seu servidor
+   - Mude ASAAS_SANDBOX=False
+   - Use chave de produção
+
+═══════════════════════════════════════════════════════
+🔒 SEGURANÇA - LEMBRETE
+═══════════════════════════════════════════════════════
+
+❌ NUNCA commit do .env
+✅ SEMPRE use .env.example como referência
+❌ NUNCA compartilhe senhas por chat/email
+✅ SEMPRE use variáveis de ambiente em produção
+❌ NUNCA hardcode chaves no código
+✅ SEMPRE regenere SECRET_KEY para produção
+
+═══════════════════════════════════════════════════════
+```
