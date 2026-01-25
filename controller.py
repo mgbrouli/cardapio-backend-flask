@@ -1,79 +1,76 @@
-from model import db, Produtos, Imagens
-import base64
+"""
+Arquivo de compatibilidade para o controller antigo.
+Importa e re-exporta funções do novo ProdutoService para manter compatibilidade backward.
 
-def create_prod(empresa_id ,nome, ingredientes, preco, image_name=None, image_data=None):
+NOVO: Use app.services.produto_service ao invés deste arquivo
+from app.services.produto_service import ProdutoService
+"""
 
-    novo_produto = Produtos(nome=nome, ingredientes=ingredientes, preco=preco, empresa_id=empresa_id)
-    db.session.add(novo_produto)
-    db.session.commit()
+from app.services.produto_service import ProdutoService
+from app.repositories.imagem_repository import ImagemRepository
 
-    if image_data is not None and image_name is not None:
-        nova_imagem = Imagens(produto_id=novo_produto.id, empresa_id=empresa_id, name=image_name, image=image_data)
-        db.session.add(nova_imagem)
-        db.session.commit()
+# Instanciar serviço
+_produto_service = ProdutoService()
+_imagem_repo = ImagemRepository()
 
-    return {'message': 'Produto adicionado com sucesso'}
 
-def get_all_prod():
-    lista_produto = Produtos.query.all()
-
-    return lista_produto
-
-def get_all_prod_with_images(empresa_id):
-    """Retorna todos os produtos com suas imagens associadas"""
-    produtos = Produtos.query.filter_by(empresa_id=empresa_id).all()
-    resultado = []
-    
-    for produto in produtos:
-        imagem = Imagens.query.filter_by(produto_id=produto.id, empresa_id=empresa_id).first()
-
-        img_base64 = None
-        if imagem and imagem.image:
-            img_base64 = base64.b64encode(imagem.image).decode('utf-8')
-
-        resultado.append({
-            'produto': produto,
-            'imagem': img_base64
-        })
-    
+# Funções de compatibilidade
+def create_prod(empresa_id, nome, ingredientes, preco, image_name=None, image_data=None):
+    """Compatibilidade: create_prod → ProdutoService.criar_produto"""
+    resultado = _produto_service.criar_produto(
+        empresa_id=empresa_id,
+        nome=nome,
+        ingredientes=ingredientes,
+        preco=preco,
+        image_name=image_name,
+        image_data=image_data
+    )
     return resultado
 
+
+def get_all_prod():
+    """Compatibilidade: get_all_prod → deprecated"""
+    from app.models import Produtos
+    return Produtos.query.all()
+
+
+def get_all_prod_with_images(empresa_id):
+    """Compatibilidade: get_all_prod_with_images → ProdutoService.obter_produtos_com_imagens"""
+    return _produto_service.obter_produtos_com_imagens(empresa_id)
+
+
 def delete_prod(id):
-    produto = Produtos.query.get_or_404(id)
-
-    try:
-        db.session.delete(produto)
-        db.session.commit()
-
+    """Compatibilidade: delete_prod → ProdutoService.deletar_produto"""
+    resultado = _produto_service.deletar_produto(id)
+    
+    if resultado['success']:
         return '', 204
-    except:
-        return 'Erro', 500
+    else:
+        return resultado['message'], 500
+
 
 def update_prod(id, nome, ingredientes, preco, image_name=None, image_data=None):
-    """Atualiza um produto existente"""
-    produto = Produtos.query.get_or_404(id)
-    
-    produto.nome = nome
-    produto.ingredientes = ingredientes
-    produto.preco = preco
-    db.session.commit()
-    
-    # Se uma nova imagem foi enviada, atualizar ou criar
-    if image_data is not None and image_name is not None:
-        imagem = Imagens.query.filter_by(produto_id=id).first()
-        if imagem:
-            imagem.name = image_name
-            imagem.image = image_data
-            db.session.commit()
-        else:
-            nova_imagem = Imagens(produto_id=id, name=image_name, image=image_data)
-            db.session.add(nova_imagem)
-            db.session.commit()
-    
-    return {'message': 'Produto atualizado com sucesso'}
-    
-    
+    """Compatibilidade: update_prod → ProdutoService.atualizar_produto"""
+    return _produto_service.atualizar_produto(
+        produto_id=id,
+        nome=nome,
+        ingredientes=ingredientes,
+        preco=preco,
+        image_name=image_name,
+        image_data=image_data
+    )
+
+
 def get_all_images(id):
-    """Retorna a imagem associada a um produto específico"""
-    return Imagens.query.filter_by(produto_id=id).first()
-    
+    """Compatibilidade: get_all_images → ImagemRepository.get_by_produto"""
+    return _imagem_repo.get_by_produto(id)
+
+
+__all__ = [
+    'create_prod',
+    'get_all_prod',
+    'get_all_prod_with_images',
+    'delete_prod',
+    'update_prod',
+    'get_all_images'
+]
