@@ -1,4 +1,12 @@
-# 📋 CHANGELOG - Refatoração do Cardápio Flask
+# Changelog
+
+## Migração para FastAPI
+
+- Substituído Flask e Flask-Login por FastAPI, Uvicorn e sessões Starlette.
+- Mantido o banco SQLite e as rotas necessárias para a interface atual.
+- Novas senhas usam Argon2; hashes Werkzeug são migrados após login válido.
+
+## Refatoração anterior
 
 Data: 25/01/2026
 Versão: 2.0 (Refatorada)
@@ -284,7 +292,7 @@ empresa_bp:    GET    /empresa/home
 ```
 1. HTTP Request
    └─ POST /produto/add/1
-   └─ nome=Pizza, ingredientes=Queijo, preco=35.00, image=file.jpg
+   └─ nome=Produto, ingredientes=Descrição opcional, preco=35.00, image=file.jpg
 
 2. Flask Route
    └─ produto_routes.add_produto(empresa_id=1)

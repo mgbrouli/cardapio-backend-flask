@@ -40,8 +40,8 @@ def verificar_asaas():
     return True
 
 
-def verificar_flask():
-    """Verifica configuração do Flask"""
+def verificar_fastapi():
+    """Verifica as configurações da aplicação FastAPI."""
     secret_key = os.getenv('SECRET_KEY', '')
     
     if not secret_key or secret_key.startswith('uma-chave'):
@@ -55,21 +55,14 @@ def verificar_flask():
 def testar_asaas_api():
     """Testa conexão com API do Asaas"""
     try:
-        import requests
-        from app import create_app
-        
-        app = create_app()
-        with app.app_context():
-            from app.services.asaas_service import AsaasService
-            service = AsaasService()
-            
-            if service.validar_chave_api():
-                print("✅ Conexão com Asaas validada!")
-                return True
-            else:
-                print("⚠️  Não foi possível validar Asaas (verifique conexão de internet)")
-                print("   Mas a configuração está correta!")
-                return True  # Não falha se a chave está configurada
+        from app.services.asaas_service import AsaasService
+        service = AsaasService()
+
+        if service.validar_chave_api():
+            print("✅ Conexão com Asaas validada!")
+            return True
+        print("⚠️  Não foi possível validar Asaas (verifique conexão de internet)")
+        return True
     except Exception as e:
         print(f"⚠️  Erro ao testar Asaas: {str(e)}")
         print("   Mas a configuração está correta!")
@@ -85,7 +78,7 @@ def main():
     checks = [
         ("Arquivo .env", verificar_dotenv),
         ("Configuração Asaas", verificar_asaas),
-        ("Configuração Flask", verificar_flask),
+        ("Configuração FastAPI", verificar_fastapi),
         ("Conexão Asaas", testar_asaas_api),
     ]
     

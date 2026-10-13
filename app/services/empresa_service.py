@@ -1,7 +1,7 @@
 """Serviço para gerenciar Empresas"""
 import os
 import time
-from flask import url_for
+from werkzeug.utils import secure_filename
 from app.repositories.empresa_repository import EmpresaRepository
 
 
@@ -18,9 +18,14 @@ class EmpresaService:
     def obter_empresa_ativa(self, empresa_id):
         """Obtém uma empresa ativa pelo ID"""
         return self.empresa_repo.get_ativa_by_id(empresa_id)
+
+    def listar_empresas_publicas(self, limite=12):
+        """Lista empresas ativas para exibição na página inicial."""
+        return self.empresa_repo.get_ativas(limit=limite)
     
-    def atualizar_configuracoes(self, empresa_id, dados, basedir):
+    def atualizar_configuracoes(self, empresa_id, dados, _basedir):
         """Atualiza as configurações de uma empresa"""
+        _ = _basedir
         try:
             empresa = self.empresa_repo.get_by_id(empresa_id)
             
@@ -82,11 +87,13 @@ class EmpresaService:
             
             # Gerar nome único
             timestamp = int(time.time())
-            filename = f'{tipo}_{empresa_id}_{timestamp}_{arquivo.filename}'
+            original_name = secure_filename(arquivo.filename)
+            filename = f'{tipo}_{empresa_id}_{timestamp}_{original_name}'
             filepath = os.path.join(uploads_dir, filename)
             
-            arquivo.save(filepath)
-            return url_for('static', filename=f'uploads/{filename}')
+            with open(filepath, "wb") as destination:
+                destination.write(arquivo.file.read())
+            return f'/static/uploads/{filename}'
         
         except Exception as e:
             raise Exception(f'Erro ao processar arquivo: {str(e)}')

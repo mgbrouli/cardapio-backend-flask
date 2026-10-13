@@ -147,7 +147,6 @@ def main():
     doc_files = [
         'README_ESTRUTURA.md',
         'ARQUITETURA.md',
-        'TESTES.md',
         'GUIA_RAPIDO.md',
         'EXEMPLOS_USO.py',
         'ESTRUTURA_FINAL.md',
@@ -160,10 +159,11 @@ def main():
     # 9. Verificar imports
     print(f"\n{YELLOW}9. Verificando imports...{END}")
     imports_to_check = [
-        'flask',
-        'flask_sqlalchemy',
-        'flask_login',
-        'werkzeug'
+        'fastapi',
+        'uvicorn',
+        'sqlalchemy',
+        'argon2',
+        'multipart'
     ]
     for module in imports_to_check:
         check_import(module)
@@ -178,7 +178,7 @@ def main():
         print(f"  1. Leia: README_ESTRUTURA.md")
         print(f"  2. Entenda: ARQUITETURA.md")
         print(f"  3. Consulte: GUIA_RAPIDO.md")
-        print(f"  4. Execute: python app.py")
+        print(f"  4. Execute: python run.py")
         return 0
     else:
         print(f"{RED}{'✗ EXISTEM PROBLEMAS!'}{END}")

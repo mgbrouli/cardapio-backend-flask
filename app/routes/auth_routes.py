@@ -1,56 +1,92 @@
-"""Rotas de autenticação"""
-from flask import Blueprint, render_template, request, redirect, url_for
-from flask_login import login_user, logout_user
+"""Rotas de autenticação."""
+
+from fastapi import APIRouter, Request
+from fastapi.responses import RedirectResponse
+
+from app.services.empresa_service import EmpresaService
 from app.services.auth_service import AuthService
+from app.templating import templates
 
-auth_bp = Blueprint('auth', __name__)
-
+router = APIRouter()
 auth_service = AuthService()
+empresa_service = EmpresaService()
 
 
-@auth_bp.route('/cadastro', methods=['GET', 'POST'])
-def cadastro():
-    """Registro de novo usuário"""
-    if request.method == 'POST':
-        email = request.form.get('email')
-        senha = request.form.get('senha')
-        nome_loja = request.form.get('nome_loja')
-        whatsapp = request.form.get('whatsapp')
-        
-        resultado = auth_service.registrar_usuario(email, senha, nome_loja, whatsapp)
-        
-        if resultado['success']:
-            return redirect(url_for('auth.login'))
-        else:
-            return resultado['message'], 400
-    
-    return render_template('cadastro.html')
+def _landing_context(**values):
+    return {
+        "empresas": empresa_service.listar_empresas_publicas(),
+        **values,
+    }
 
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
-def login():
-    """Login do usuário"""
-    erro = None
-    email_enviado = None
-    
-    if request.method == 'POST':
-        email = request.form.get('email')
-        senha = request.form.get('senha')
-        email_enviado = email
-        
-        resultado = auth_service.validar_credenciais(email, senha)
-        
-        if resultado['success']:
-            login_user(resultado['usuario'])
-            return redirect(url_for('empresa.home'))
-        else:
-            erro = resultado['message']
-    
-    return render_template('landing.html', erro_login=erro, email_login=email_enviado)
+@router.get("/cadastro", name="auth.cadastro")
+async def cadastro_page(request: Request):
+    return templates.TemplateResponse(
+        request=request, name="landing.html", context=_landing_context()
+    )
 
 
-@auth_bp.route('/logout')
-def logout():
-    """Logout do usuário"""
-    logout_user()
-    return redirect(url_for('auth.login'))
+@router.post("/cadastro", name="auth.register")
+async def cadastro(request: Request):
+    form = await request.form()
+    email = form.get("email")
+    senha = form.get("senha")
+    nome_loja = form.get("nome_loja")
+    whatsapp = form.get("whatsapp")
+    if not all((email, senha, nome_loja, whatsapp)):
+        return templates.TemplateResponse(
+            request=request,
+            name="landing.html",
+            context=_landing_context(
+                erro_cadastro="Preencha todos os campos do cadastro."
+            ),
+            status_code=400,
+        )
+
+    resultado = auth_service.registrar_usuario(email, senha, nome_loja, whatsapp)
+    if resultado["success"]:
+        return RedirectResponse(url="/login", status_code=303)
+    return templates.TemplateResponse(
+        request=request,
+        name="landing.html",
+        context=_landing_context(erro_cadastro=resultado["message"]),
+        status_code=400,
+    )
+
+
+@router.get("/login", name="auth.login")
+async def login_page(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="landing.html",
+        context=_landing_context(erro_login=None, email_login=None),
+    )
+
+
+@router.post("/login", name="auth.authenticate")
+async def login(request: Request):
+    form = await request.form()
+    email = form.get("email")
+    senha = form.get("senha")
+    resultado = (
+        auth_service.validar_credenciais(email, senha)
+        if email and senha
+        else {"success": False, "message": "Informe e-mail e senha"}
+    )
+    if resultado["success"]:
+        request.session["user_id"] = resultado["usuario"].id
+        return RedirectResponse(url="/empresa/home", status_code=303)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="landing.html",
+        context=_landing_context(
+            erro_login=resultado["message"], email_login=email
+        ),
+    )
+
+
+@router.get("/logout", name="auth.logout")
+async def logout(request: Request):
+    request.session.clear()
+    return RedirectResponse(url="/login", status_code=303)

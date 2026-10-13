@@ -2,7 +2,6 @@
 
 import os
 import time
-from flask import url_for
 
 
 def gerar_nome_arquivo_unico(tipo, empresa_id, filename):

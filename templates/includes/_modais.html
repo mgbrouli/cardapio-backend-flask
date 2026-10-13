@@ -38,6 +38,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         loginModal.show();
     }
+    if (document.querySelectorAll('#cadastroModal .alert-danger').length > 0) {
+        new bootstrap.Modal(document.getElementById('cadastroModal')).show();
+    }
 });
 </script>
 
@@ -49,6 +52,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
+                {% if erro_cadastro %}
+                <div class="alert alert-danger fade show mb-3" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    <strong>Erro:</strong> {{ erro_cadastro }}
+                </div>
+                {% endif %}
                 <form action="{{ url_for('auth.cadastro') }}" method="POST">
                     <div class="row g-3">
                         <div class="col-md-6">
@@ -61,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Nome do Estabelecimento</label>
-                            <input type="text" name="nome_loja" class="form-control" placeholder="Ex: Pizzaria do Zé" required>
+                            <input type="text" name="nome_loja" class="form-control" placeholder="Ex: Restaurante do Zé" required>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">WhatsApp para Pedidos</label>

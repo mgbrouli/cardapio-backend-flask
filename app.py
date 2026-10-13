@@ -1,17 +1,11 @@
-"""
-Aplicação principal Flask - Cardápio
+"""Entrypoint de compatibilidade para iniciar o servidor FastAPI."""
 
-Para executar:
-    python app.py          # Modo desenvolvimento
-    python run.py          # Com configurações adicionais
-"""
+import uvicorn
 
-from app import create_app
+from main import app
 
-# Criar aplicação
-app = create_app()
+__all__ = ["app"]
 
-if __name__ == '__main__':
-    # Desenvolvimento: porta 5000 (sem privilégios)
-    # Produção: porta 80 (requer privilégios)
-    app.run(host="0.0.0.0", port=5000, debug=True)
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)

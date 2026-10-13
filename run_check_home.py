@@ -1,7 +1,8 @@
 from app import create_app
-from flask import url_for
 app = create_app()
-with app.test_request_context():
-    print('empresa.subscribe ->', url_for('empresa.subscribe', empresa_id=1))
-    print('config (legacy) ->', url_for('empresa.config', empresa_id=1))
-    print('empresa.home ->', url_for('empresa.home'))
+for route_name, values in (
+    ('empresa.subscribe', {'empresa_id': 1}),
+    ('empresa.config', {'empresa_id': 1}),
+    ('empresa.home', {}),
+):
+    print(f'{route_name} -> {app.url_path_for(route_name, **values)}')

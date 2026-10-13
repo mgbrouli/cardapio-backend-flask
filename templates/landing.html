@@ -34,6 +34,77 @@
         }
 
         .nav-link { font-weight: 500; }
+
+        .business-card {
+            overflow: hidden;
+            border: 0;
+            border-radius: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .business-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.14);
+        }
+
+        .business-card-cover {
+            position: relative;
+            display: grid;
+            height: 135px;
+            place-items: center;
+            overflow: hidden;
+            background: linear-gradient(135deg, #0d6efd, #002d72 55%, #6f42c1);
+        }
+
+        .business-card-cover::after {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.35), transparent 70%);
+            content: "";
+        }
+
+        .business-card-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .business-card-placeholder {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 3rem;
+        }
+
+        .business-card-logo {
+            position: absolute;
+            z-index: 1;
+            right: 1rem;
+            bottom: -1.5rem;
+            display: grid;
+            width: 3.5rem;
+            height: 3.5rem;
+            place-items: center;
+            overflow: hidden;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0d6efd, #6f42c1);
+            color: #fff;
+        }
+
+        .business-card-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .business-card-logo .bi {
+            font-size: 1.4rem;
+        }
+
+        .business-card-name {
+            min-height: 3.5rem;
+            padding-right: 3.5rem;
+            overflow-wrap: anywhere;
+        }
     </style>
 </head>
 <body>
@@ -68,7 +139,7 @@
                 <div class="col-md-4">
                     <i class="bi bi-pencil-square feature-icon"></i>
                     <h4>1. Cadastre seu Menu</h4>
-                    <p class="text-muted">Adicione suas pizzas, preços e fotos de forma simples pelo painel administrativo.</p>
+                    <p class="text-muted">Adicione seus produtos, preços e fotos de forma simples pelo painel administrativo.</p>
                 </div>
                 <div class="col-md-4">
                     <i class="bi bi-share feature-icon"></i>
@@ -83,6 +154,45 @@
             </div>
         </div>
     </section>
+
+    {% if empresas %}
+    <section class="py-5 bg-light" id="empresas">
+        <div class="container py-4">
+            <div class="text-center mb-4">
+                <h2 class="fw-bold">Quem já usa nosso serviço</h2>
+                <p class="text-muted mb-0">Conheça alguns estabelecimentos com cardápio digital.</p>
+            </div>
+            <div class="row g-3 justify-content-center">
+                {% for empresa in empresas %}
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a class="card business-card h-100 text-decoration-none text-dark shadow-sm"
+                       href="/{{ empresa.id }}" aria-label="Ver cardápio de {{ empresa.name_est }}">
+                        <div class="business-card-cover">
+                            {% if empresa.banner_path or empresa.logo_path %}
+                            <img src="{{ empresa.banner_path or empresa.logo_path }}"
+                                 alt="" loading="lazy">
+                            {% else %}
+                            <i class="bi bi-shop business-card-placeholder" aria-hidden="true"></i>
+                            {% endif %}
+                            <span class="business-card-logo">
+                                {% if empresa.logo_path %}
+                                <img src="{{ empresa.logo_path }}" alt="Logotipo de {{ empresa.name_est }}"
+                                     loading="lazy">
+                                {% else %}
+                                <i class="bi bi-shop" aria-hidden="true"></i>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="card-body pt-4">
+                            <h3 class="h6 fw-bold mb-0 business-card-name">{{ empresa.name_est }}</h3>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     
     <section id="planos" class="py-5 bg-light">

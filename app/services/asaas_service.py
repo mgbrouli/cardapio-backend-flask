@@ -1,15 +1,16 @@
 """Serviço para integração com Asaas - Pagamentos"""
 import requests
-from flask import current_app
 from typing import Dict, Optional
+from config import get_config
 
 
 class AsaasService:
     """Serviço para comunicação com API do Asaas"""
     
     def __init__(self):
-        self.api_key = current_app.config.get('ASAAS_API_KEY')
-        self.base_url = current_app.config.get('ASAAS_BASE_URL')
+        settings = get_config()
+        self.api_key = settings.ASAAS_API_KEY
+        self.base_url = settings.ASAAS_BASE_URL
         self.headers = {
             'access_token': self.api_key,
             'Content-Type': 'application/json'

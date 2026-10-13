@@ -1,27 +1,41 @@
-"""Rotas públicas (sem autenticação)"""
-from flask import Blueprint, render_template
-from app.services.produto_service import ProdutoService
+"""Rotas públicas (sem autenticação)."""
+
+from fastapi import APIRouter, Request
+from fastapi.responses import PlainTextResponse, RedirectResponse
+
 from app.services.empresa_service import EmpresaService
+from app.services.produto_service import ProdutoService
+from app.templating import templates
 
-public_bp = Blueprint('public', __name__)
-
+router = APIRouter()
 produto_service = ProdutoService()
 empresa_service = EmpresaService()
 
 
-@public_bp.route('/')
-def landing():
-    """Página de landing"""
-    return render_template('landing.html')
+@router.get("/", name="public.landing")
+async def landing(request: Request):
+    return templates.TemplateResponse(
+        request=request,
+        name="landing.html",
+        context={"empresas": empresa_service.listar_empresas_publicas()},
+    )
 
 
-@public_bp.route('/<int:empresa_id>', methods=['GET'])
-def index(empresa_id):
-    """Exibe cardápio de uma empresa"""
-    empresa = empresa_service.obter_empresa_ativa(empresa_id)
-    
+@router.get("/{empresa_id:int}", name="public.menu")
+async def index(empresa_id: int, request: Request):
+    empresa = empresa_service.obter_empresa(empresa_id)
     if not empresa:
-        return "Este cardápio está temporariamente suspenso. Entre em contato com o administrador.", 403
-    
+        return RedirectResponse(url="/", status_code=302)
+    if not empresa.ativo:
+        return PlainTextResponse(
+            "Este cardápio está temporariamente suspenso. "
+            "Entre em contato com o administrador.",
+            status_code=403,
+        )
+
     produtos_com_imagens = produto_service.obter_produtos_com_imagens(empresa_id)
-    return render_template('index.html', produto=produtos_com_imagens, empresa=empresa)
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"produto": produtos_com_imagens, "empresa": empresa},
+    )

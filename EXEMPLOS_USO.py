@@ -17,10 +17,10 @@ produto_service = ProdutoService()
 # Criar um novo produto
 resultado = produto_service.criar_produto(
     empresa_id=1,
-    nome="Pizza Margherita",
-    ingredientes="Tomate, Queijo, Manjericão",
+    nome="Refrigerante",
+    ingredientes="",
     preco=35.00,
-    image_name="pizza.jpg",
+    image_name="refrigerante.jpg",
     image_data=b"<dados da imagem>"
 )
 
@@ -40,8 +40,8 @@ for item in produtos:
 # Atualizar um produto
 resultado = produto_service.atualizar_produto(
     produto_id=1,
-    nome="Pizza Margherita Premium",
-    ingredientes="Tomate, Queijo de Búfala, Manjericão",
+    nome="Refrigerante Premium",
+    ingredientes="",
     preco=45.00
 )
 
@@ -77,7 +77,7 @@ else:
 
 # Atualizar configurações
 dados = {
-    'nome_est': 'Pizzaria Nova',
+    'nome_est': 'Restaurante Nova',
     'whatsapp': '11999999999',
     'primary_color': '#FF0000',
     'bg_color': '#FFFFFF'
@@ -99,7 +99,7 @@ auth_service = AuthService()
 resultado = auth_service.registrar_usuario(
     email="joao@example.com",
     senha="senha123",
-    nome_loja="Pizzaria do João",
+    nome_loja="Restaurante do João",
     whatsapp="11988888888"
 )
 
@@ -168,20 +168,21 @@ print(f"Email já cadastrado: {existe}")
 # 5. DENTRO DE UMA ROTA (EXEMPLO)
 # ============================================================================
 
-from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from fastapi import APIRouter, Depends
+from fastapi.responses import JSONResponse
+from app.security import get_current_user
 from app.services.produto_service import ProdutoService
 
-exemplo_bp = Blueprint('exemplo', __name__)
+exemplo_router = APIRouter()
 produto_service = ProdutoService()
 
 
-@exemplo_bp.route('/produtos/<int:empresa_id>')
-def listar_produtos(empresa_id):
+@exemplo_router.get('/produtos/{empresa_id}')
+def listar_produtos(empresa_id: int, current_user=Depends(get_current_user)):
     """Lista todos os produtos de uma empresa"""
     # Validar acesso
     if current_user.empresa_id != empresa_id:
-        return jsonify({'error': 'Acesso negado'}), 403
+        return JSONResponse({'error': 'Acesso negado'}, status_code=403)
     
     # Usar o serviço
     produtos = produto_service.obter_produtos_com_imagens(empresa_id)
@@ -196,7 +197,7 @@ def listar_produtos(empresa_id):
             'imagem': item['imagem']
         })
     
-    return jsonify(resultado)
+    return resultado
 
 
 # ============================================================================
@@ -232,7 +233,7 @@ service = ProdutoService()
 resultado = service.criar_produto(
     empresa_id=1,
     nome="Produto",
-    ingredientes="Ingredientes",
+    ingredientes="Descrição do produto",
     preco="texto_invalido"  # Vai retornar erro de preço inválido
 )
 

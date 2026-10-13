@@ -1,45 +1,22 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""Script para resetar senha sem apagar dados"""
+"""Redefine uma senha usando Argon2 sem exibir ou armazenar credenciais."""
+
+from getpass import getpass
 
 from app import create_app, db
 from app.models import Usuario
-from werkzeug.security import generate_password_hash
+from app.services.auth_service import password_hasher
 
-app = create_app()
+create_app()
+email = input("E-mail da conta: ").strip()
+new_password = getpass("Nova senha: ")
+if not new_password or new_password != getpass("Repita a nova senha: "):
+    raise SystemExit("As senhas estão vazias ou não coincidem.")
 
-with app.app_context():
-    print('🔧 RESETANDO SENHA DO USUÁRIO')
-    print('='*60)
-    
-    # Encontrar usuário
-    usuario = Usuario.query.filter_by(email='wtnbrouli@gmail.com').first()
-    
-    if not usuario:
-        print('❌ Usuário não encontrado!')
-        exit(1)
-    
-    print(f'✅ Usuário encontrado: {usuario.email}')
-    print(f'   Empresa: {usuario.empresa_id}')
-    print(f'   ID: {usuario.id}')
-    
-    # Resetar senha
-    nova_senha = '123456'
-    usuario.senha = generate_password_hash(nova_senha)
-    db.session.commit()
-    
-    print(f'\n✅ Senha resetada!')
-    print(f'   Nova senha: {nova_senha}')
-    
-    # Verificar que funcionou
-    from app.services.auth_service import AuthService
-    service = AuthService()
-    resultado = service.validar_credenciais(usuario.email, nova_senha)
-    
-    if resultado['success']:
-        print(f'\n✅ Teste de login: OK')
-        print(f'\nℹ️  Dados preservados:')
-        print(f'   Email: {usuario.email}')
-        print(f'   Empresa ID: {usuario.empresa_id}')
-    else:
-        print(f'\n❌ Teste de login falhou')
+usuario = Usuario.query.filter_by(email=email).first()
+if usuario is None:
+    raise SystemExit("Usuário não encontrado.")
+
+usuario.senha = password_hasher.hash(new_password)
+db.session.commit()
+print("Senha atualizada com Argon2.")

@@ -16,6 +16,7 @@ class ProdutoService:
         try:
             # Validar preço
             preco = float(preco)
+            ingredientes = ingredientes or ""
             
             # Criar produto
             produto = self.produto_repo.create(
@@ -64,6 +65,7 @@ class ProdutoService:
         """Atualiza um produto existente"""
         try:
             preco = float(preco)
+            ingredientes = ingredientes or ""
             produto = self.produto_repo.get_by_id(produto_id)
             
             if not produto:
