@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Administração da Plataforma</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container">
+            <span class="navbar-brand fw-bold"><i class="bi bi-shield-lock me-2"></i>Administração da Plataforma</span>
+            <a href="{{ url_for('empresa.home') }}" class="btn btn-outline-light btn-sm">Voltar ao painel</a>
+        </div>
+    </nav>
+
+    <main class="container py-4">
+        <p class="text-muted">Acesso administrativo autenticado: {{ admin.email }}</p>
+
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="text-muted">Empresas cadastradas</div><div class="fs-2 fw-bold">{{ company_count }}</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="text-muted">Contas</div><div class="fs-2 fw-bold">{{ user_count }}</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="text-muted">Produtos cadastrados</div><div class="fs-2 fw-bold">{{ product_count }}</div>
+                </div></div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card shadow-sm h-100"><div class="card-body">
+                    <div class="text-muted">Ativas nos últimos 15 min</div><div class="fs-2 fw-bold">{{ online_users }}</div>
+                </div></div>
+            </div>
+        </div>
+
+        <section class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5">Provedor de pagamento</h2>
+                <p class="text-muted">As chaves secretas são configuradas no servidor e nunca são exibidas aqui.</p>
+                <form method="post" action="/admin/payment-provider" class="row g-2 align-items-end">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="col-sm-8 col-md-6">
+                        <label for="provider" class="form-label">Provedor ativo</label>
+                        <select class="form-select" id="provider" name="provider" required>
+                            {% for provider in ('asaas', 'stripe') %}
+                            <option value="{{ provider }}" {% if payment_provider == provider %}selected{% endif %}
+                                {% if not provider_configured[provider] %}disabled{% endif %}>
+                                {{ provider|capitalize }}{% if not provider_configured[provider] %} (credenciais não configuradas){% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-sm-4 col-md-3">
+                        <button class="btn btn-primary w-100" type="submit">Salvar provedor</button>
+                    </div>
+                </form>
+                <small class="d-block text-muted mt-2">
+                    Configure ASAAS_API_KEY e WEBHOOK_SECRET ou STRIPE_SECRET_KEY e STRIPE_WEBHOOK_SECRET no ambiente.
+                </small>
+            </div>
+        </section>
+
+        <section class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5">Distribuição de planos</h2>
+                <div class="d-flex flex-wrap gap-3">
+                    <span>Grátis: <strong>{{ plans.get('gratis', 0) }}</strong></span>
+                    <span>Pro: <strong>{{ plans.get('pro', 0) }}</strong></span>
+                    <span>Premium: <strong>{{ plans.get('premium', 0) }}</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h2 class="h5">Empresas usando o serviço</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead><tr><th>Empresa</th><th>Conta</th><th>Plano</th><th>Produtos</th><th>Status</th></tr></thead>
+                        <tbody>
+                            {% for empresa, email, count in companies %}
+                            <tr>
+                                <td>{{ empresa.name_est }}</td><td>{{ email or '—' }}</td>
+                                <td>{{ empresa.plano|capitalize }}</td><td>{{ count }}</td>
+                                <td>{{ 'Ativa' if empresa.ativo else 'Suspensa' }}</td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="5" class="text-muted">Nenhuma empresa cadastrada.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h5">Contas e atividade recente</h2>
+                <div class="table-responsive">
+                    <table class="table table-striped align-middle">
+                        <thead><tr><th>E-mail</th><th>Empresa</th><th>Última atividade</th><th>Presença</th></tr></thead>
+                        <tbody>
+                            {% for user, last_seen in recent_users %}
+                            <tr>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.empresa.name_est if user.empresa else '—' }}</td>
+                                <td>{{ last_seen or 'Ainda não registrada' }}</td>
+                                <td>
+                                    {% if last_seen and last_seen >= online_since %}
+                                    <span class="badge text-bg-success">Ativa</span>
+                                    {% else %}
+                                    <span class="badge text-bg-secondary">Inativa</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr><td colspan="4" class="text-muted">Nenhuma conta cadastrada.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <p class="small text-muted mb-0">Listagem limitada às 100 empresas e contas mais recentes. O sistema ainda não registra pedidos/vendas; por isso, o volume exibido é de contas, empresas e produtos.</p>
+            </div>
+        </section>
+    </main>
+    <script>
+        setInterval(() => fetch('/session/heartbeat', { cache: 'no-store' }), 60000);
+    </script>
+</body>
+
+</html>

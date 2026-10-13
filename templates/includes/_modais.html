@@ -12,7 +12,13 @@
                     <strong>Erro:</strong> {{ erro_login }}
                 </div>
                 {% endif %}
+                {% if info_login %}
+                <div class="alert alert-info fade show mb-3" role="status">
+                    {{ info_login }}
+                </div>
+                {% endif %}
                 <form action="{{ url_for('auth.login') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="mb-3">
                         <label class="form-label fw-bold">E-mail</label>
                         <input type="email" name="email" class="form-control" placeholder="seu@email.com" value="{{ email_login or '' }}" required>
@@ -23,6 +29,11 @@
                     </div>
                     <button type="submit" class="btn btn-dark w-100 py-2 fw-bold shadow-sm">Entrar</button>
                 </form>
+                <div class="text-center mt-3">
+                    <a href="/redefinir-senha">Esqueci minha senha</a>
+                    <span class="text-muted mx-1">·</span>
+                    <a href="/reenviar-verificacao">Reenviar confirmação de e-mail</a>
+                </div>
             </div>
         </div>
     </div>
@@ -31,7 +42,7 @@
 <script>
 // Abrir modal de login automaticamente se houver erro
 document.addEventListener('DOMContentLoaded', function() {
-    if (document.querySelectorAll('#loginModal .alert-danger').length > 0) {
+    if (document.querySelectorAll('#loginModal .alert-danger, #loginModal .alert-info').length > 0) {
         const loginModal = new bootstrap.Modal(document.getElementById('loginModal'), {
             backdrop: 'static',
             keyboard: false
@@ -59,14 +70,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 {% endif %}
                 <form action="{{ url_for('auth.cadastro') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">E-mail Administrativo</label>
-                            <input type="email" name="email" class="form-control" required>
+                            <input type="email" name="email" class="form-control" maxlength="254" required autocomplete="email">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Senha de Acesso</label>
-                            <input type="password" name="senha" class="form-control" required>
+                            <input type="password" name="senha" class="form-control" minlength="12" maxlength="1024" required autocomplete="new-password">
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Nome do Estabelecimento</label>

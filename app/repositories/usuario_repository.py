@@ -1,4 +1,6 @@
 """Repository para gerenciar Usuários"""
+from sqlalchemy import func
+
 from app.models import Usuario
 from .base_repository import BaseRepository
 
@@ -11,7 +13,7 @@ class UsuarioRepository(BaseRepository):
     
     def get_by_email(self, email):
         """Retorna um usuário pelo email"""
-        return Usuario.query.filter_by(email=email).first()
+        return Usuario.query.filter(func.lower(Usuario.email) == email.strip().lower()).first()
     
     def email_exists(self, email):
         """Verifica se um email já está registrado"""

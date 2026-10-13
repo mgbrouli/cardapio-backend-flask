@@ -1,6 +1,8 @@
 """Templates Jinja2 e gerador de URLs usados pela interface HTML."""
 
 from pathlib import Path
+from jinja2 import pass_context
+from app.security import get_csrf_token
 
 from starlette.templating import Jinja2Templates
 
@@ -32,3 +34,12 @@ def _template_url_for(endpoint, **values):
 
 
 templates.env.globals["url_for"] = _template_url_for
+
+
+@pass_context
+def _csrf_token(context):
+    request = context.get("request")
+    return get_csrf_token(request) if request is not None else ""
+
+
+templates.env.globals["csrf_token"] = _csrf_token

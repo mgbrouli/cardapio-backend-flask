@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse, PlainTextResponse, Response
 
 from app.models import Produtos
-from app.security import get_current_user
+from app.security import get_current_user, verify_csrf_token
 from app.services.produto_service import ProdutoService
+from app.utils.image_utils import MAX_IMAGE_SIZE, validate_image_content
 
 router = APIRouter()
 produto_router = APIRouter(prefix="/produto")
@@ -14,14 +15,31 @@ produto_service = ProdutoService()
 
 async def _product_form(request: Request, image_field: str):
     form = await request.form()
+    if not verify_csrf_token(request, form.get("csrf_token")):
+        return form, None, None
     image = form.get(image_field)
     image_name = getattr(image, "filename", None) or None
-    image_data = await image.read() if image_name else None
+    image_data = await image.read(MAX_IMAGE_SIZE + 1) if image_name else None
     return form, image_name, image_data
+
+
+def _validate_product_image(image_name, image_data):
+    if not image_data:
+        return None
+    try:
+        validate_image_content(image_name, image_data)
+    except ValueError as exc:
+        return PlainTextResponse(str(exc), status_code=400)
+    return None
 
 
 async def _create_product(empresa_id: int, request: Request):
     form, image_name, image_data = await _product_form(request, "image")
+    if not verify_csrf_token(request, form.get("csrf_token")):
+        return PlainTextResponse("Formulário inválido", status_code=403)
+    image_error = _validate_product_image(image_name, image_data)
+    if image_error:
+        return image_error
     result = produto_service.criar_produto(
         empresa_id=empresa_id,
         nome=form.get("nome"),
@@ -57,6 +75,11 @@ async def _edit_product(produto_id: int, request: Request, current_user):
         return PlainTextResponse("Acesso negado", status_code=403)
 
     form, image_name, image_data = await _product_form(request, "imagem")
+    if not verify_csrf_token(request, form.get("csrf_token")):
+        return PlainTextResponse("Formulário inválido", status_code=403)
+    image_error = _validate_product_image(image_name, image_data)
+    if image_error:
+        return image_error
     result = produto_service.atualizar_produto(
         produto_id=produto_id,
         nome=form.get("nome"),
@@ -84,18 +107,9 @@ async def edit_product(
     return await _edit_product(produto_id, request, current_user)
 
 
-@router.delete("/remove/{produto_id:int}", name="delete")
-async def delete_legacy(produto_id: int):
-    result = produto_service.deletar_produto(produto_id)
-    if result["success"]:
-        return Response(status_code=204)
-    return PlainTextResponse(result["message"], status_code=400)
-
-
-@produto_router.delete("/delete/{produto_id:int}", name="produto.delete")
-async def delete_product(
-    produto_id: int, current_user=Depends(get_current_user)
-):
+async def _delete_product(produto_id: int, request: Request, current_user):
+    if not verify_csrf_token(request, request.headers.get("x-csrf-token")):
+        return PlainTextResponse("Formulário inválido", status_code=403)
     product = Produtos.query.get(produto_id)
     if not product or product.empresa_id != current_user.empresa_id:
         return PlainTextResponse("Acesso negado", status_code=403)
@@ -103,6 +117,20 @@ async def delete_product(
     if result["success"]:
         return Response(status_code=204)
     return PlainTextResponse(result["message"], status_code=400)
+
+
+@router.delete("/remove/{produto_id:int}", name="delete")
+async def delete_legacy(
+    produto_id: int, request: Request, current_user=Depends(get_current_user)
+):
+    return await _delete_product(produto_id, request, current_user)
+
+
+@produto_router.delete("/delete/{produto_id:int}", name="produto.delete")
+async def delete_product(
+    produto_id: int, request: Request, current_user=Depends(get_current_user)
+):
+    return await _delete_product(produto_id, request, current_user)
 
 
 async def _redirect_config(empresa_id: int, current_user):

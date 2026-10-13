@@ -1,7 +1,11 @@
 """Serviço para integração com Asaas - Pagamentos"""
+import logging
+
 import requests
 from typing import Dict, Optional
 from config import get_config
+
+logger = logging.getLogger(__name__)
 
 
 class AsaasService:
@@ -47,6 +51,47 @@ class AsaasService:
             return {
                 'success': False,
                 'message': f'Erro ao criar cliente no Asaas: {str(e)}'
+            }
+
+    def create_recurring_payment_link(
+        self, name: str, description: str, value: float
+    ) -> Dict:
+        """Cria checkout mensal recorrente hospedado pelo Asaas."""
+        if not self.api_key:
+            return {
+                "success": False,
+                "message": "A integração de pagamentos não está configurada.",
+            }
+
+        payload = {
+            "name": name,
+            "description": description,
+            "value": value,
+            "billingType": "UNDEFINED",
+            "chargeType": "RECURRENT",
+            "subscriptionCycle": "MONTHLY",
+            "notificationEnabled": True,
+        }
+        try:
+            response = requests.post(
+                f"{self.base_url}/paymentLinks",
+                json=payload,
+                headers=self.headers,
+                timeout=15,
+            )
+            response.raise_for_status()
+            data = response.json()
+            if not isinstance(data, dict):
+                return {
+                    "success": False,
+                    "message": "Resposta inválida recebida do Asaas.",
+                }
+            return {"success": True, "data": data}
+        except (requests.exceptions.RequestException, ValueError):
+            logger.exception("Falha ao criar checkout recorrente no Asaas")
+            return {
+                "success": False,
+                "message": "Não foi possível criar o checkout no Asaas.",
             }
     
     def criar_pagamento(self, customer_id: str, valor: float, descricao: str, 

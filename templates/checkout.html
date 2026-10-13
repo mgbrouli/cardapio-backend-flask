@@ -89,6 +89,13 @@
     </header>
 
     <main class="container py-5">
+        {% if erro %}
+        <div class="alert alert-danger" role="alert">{{ erro }}</div>
+        {% endif %}
+        <div class="alert alert-info" role="status">
+            Seu plano só será alterado depois que o pagamento for confirmado pelo provedor.
+            Provedor selecionado: <strong>{{ payment_provider|capitalize if payment_provider else 'não configurado' }}</strong>.
+        </div>
         <div class="row g-4 justify-content-center mb-5">
             <!-- Plano Free -->
             <div class="col-md-5 col-lg-4">
@@ -187,9 +194,10 @@
                     </div>
 
                     <form method="POST" action="{{ url_for('empresa.subscribe', empresa_id=empresa.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <input type="hidden" id="planInput" name="plano" value="">
                         <button type="submit" class="btn btn-success btn-upgrade w-100" id="confirmBtn" disabled>
-                            <i class="bi bi-check-lg me-2"></i>Confirmar Assinatura
+                            <i class="bi bi-lock-fill me-2"></i>Continuar para checkout seguro
                         </button>
                     </form>
                 </div>
@@ -227,6 +235,9 @@
                 document.getElementById('confirmBtn').disabled = false;
             });
         });
+    </script>
+    <script>
+        setInterval(() => fetch('/session/heartbeat', { cache: 'no-store' }), 60000);
     </script>
 </body>
 

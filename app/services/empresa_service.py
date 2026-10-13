@@ -1,8 +1,13 @@
 """Serviço para gerenciar Empresas"""
+import logging
 import os
-import time
+from pathlib import Path
+from uuid import uuid4
 from werkzeug.utils import secure_filename
 from app.repositories.empresa_repository import EmpresaRepository
+from app.utils.image_utils import validate_image_content
+
+logger = logging.getLogger(__name__)
 
 
 class EmpresaService:
@@ -19,9 +24,11 @@ class EmpresaService:
         """Obtém uma empresa ativa pelo ID"""
         return self.empresa_repo.get_ativa_by_id(empresa_id)
 
-    def listar_empresas_publicas(self, limite=12):
+    def listar_empresas_publicas(self, limite=12, emails_privados=()):
         """Lista empresas ativas para exibição na página inicial."""
-        return self.empresa_repo.get_ativas(limit=limite)
+        return self.empresa_repo.get_ativas(
+            limit=limite, excluded_owner_emails=emails_privados
+        )
     
     def atualizar_configuracoes(self, empresa_id, dados, _basedir):
         """Atualiza as configurações de uma empresa"""
@@ -73,30 +80,29 @@ class EmpresaService:
             
             return {'success': True, 'message': 'Configurações atualizadas com sucesso'}
         
-        except Exception as e:
-            return {'success': False, 'message': f'Erro ao atualizar configurações: {str(e)}'}
+        except Exception:
+            logger.exception("Falha ao atualizar configurações da empresa %s", empresa_id)
+            return {'success': False, 'message': 'Erro ao atualizar configurações'}
     
     def processar_upload_arquivo(self, arquivo, tipo, empresa_id, basedir):
         """Processa upload de arquivos (logo/banner)"""
-        if not arquivo or arquivo.filename == '':
+        if not arquivo or not arquivo.filename:
             return None
-        
-        try:
-            uploads_dir = os.path.join(basedir, 'static', 'uploads')
-            os.makedirs(uploads_dir, exist_ok=True)
-            
-            # Gerar nome único
-            timestamp = int(time.time())
-            original_name = secure_filename(arquivo.filename)
-            filename = f'{tipo}_{empresa_id}_{timestamp}_{original_name}'
-            filepath = os.path.join(uploads_dir, filename)
-            
-            with open(filepath, "wb") as destination:
-                destination.write(arquivo.file.read())
-            return f'/static/uploads/{filename}'
-        
-        except Exception as e:
-            raise Exception(f'Erro ao processar arquivo: {str(e)}')
+
+        if tipo not in {"logo", "banner"}:
+            raise ValueError("Tipo de imagem inválido")
+
+        extension = Path(secure_filename(arquivo.filename)).suffix.lower()
+        content = arquivo.file.read(5 * 1024 * 1024 + 1)
+        validate_image_content(arquivo.filename, content)
+
+        uploads_dir = os.path.join(basedir, "static", "uploads")
+        os.makedirs(uploads_dir, exist_ok=True)
+        filename = f"{tipo}_{empresa_id}_{uuid4().hex}{extension}"
+        filepath = os.path.join(uploads_dir, filename)
+        with open(filepath, "wb") as destination:
+            destination.write(content)
+        return f"/static/uploads/{filename}"
 
     def assinar_empresa(self, empresa_id):
         """Marca a empresa como assinante premium (placeholder)."""

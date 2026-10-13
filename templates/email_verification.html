@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="referrer" content="no-referrer">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Confirmação de e-mail - Cardápio Digital</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <main class="container min-vh-100 d-flex align-items-center justify-content-center py-5">
+        <section class="card border-0 shadow-sm w-100" style="max-width: 460px;">
+            <div class="card-body p-4">
+                <h1 class="h4 fw-bold mb-3">Confirmação de e-mail</h1>
+                {% if error %}
+                <div class="alert alert-danger" role="alert">{{ error }}</div>
+                {% endif %}
+                {% if message %}
+                <div class="alert alert-info" role="status">{{ message }}</div>
+                {% endif %}
+
+                {% if stage == "resend" %}
+                <p class="text-muted">Informe o e-mail da conta. Se ainda precisar de confirmação, enviaremos um novo link.</p>
+                <form action="/reenviar-verificacao" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input id="email" name="email" type="email" class="form-control" maxlength="254" value="{{ email or '' }}" required autocomplete="email">
+                    </div>
+                    <button class="btn btn-primary w-100" type="submit">Enviar novo link</button>
+                </form>
+                {% elif stage == "confirm" %}
+                <p class="text-muted">Confirme que você tem acesso a este endereço de e-mail.</p>
+                <form action="/verificar-email/{{ token }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-primary w-100" type="submit">Confirmar meu e-mail</button>
+                </form>
+                {% elif stage == "complete" %}
+                <a class="btn btn-primary w-100" href="/login">Ir para o login</a>
+                {% elif stage == "invalid" %}
+                <a class="btn btn-outline-primary w-100" href="/reenviar-verificacao">Solicitar novo link</a>
+                {% endif %}
+
+                {% if stage != "complete" %}
+                <div class="text-center mt-3">
+                    <a href="/login">Voltar para o login</a>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+</body>
+</html>

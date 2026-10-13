@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <title>Cardápio - {{ empresa.name_est }}</title>
@@ -102,7 +103,7 @@
                     {% endif %}
                 </div>
                 <div class="d-flex gap-2">
-                    {% if empresa.plano == 'gratis' %}
+                    {% if empresa.plano not in ('pro', 'premium') %}
                         <button type="button" class="btn btn-warning shadow-sm" data-bs-toggle="modal" data-bs-target="#subscribeModal">
                             ⭐ Assinar
                         </button>
@@ -110,9 +111,13 @@
                     <a href="{{ url_for('config', empresa_id=current_user.empresa_id) }}" class="btn btn-outline-light shadow-sm">
                         ⚙️ Configurações
                     </a>
-                    <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger shadow-sm">
-                        🚪 Logout
-                    </a>
+                    {% if is_admin %}
+                    <a href="/admin" class="btn btn-outline-warning shadow-sm">Administração</a>
+                    {% endif %}
+                    <form action="{{ url_for('auth.logout') }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-outline-danger shadow-sm">🚪 Logout</button>
+                    </form>
                 </div>
             </div>
             {% if empresa.banner_path %}
@@ -122,10 +127,17 @@
             {% endif %}
             <div class="d-flex justify-content-between align-items-center gap-3">
                 <h1 class="text-center flex-grow-1 mb-0">📋 Gestão de Cardápio</h1>
-                <button type="button" class="btn-adicionar-produto" data-bs-toggle="modal" data-bs-target="#modalAdicionarProduto">
+                <button type="button" class="btn-adicionar-produto" data-bs-toggle="modal" data-bs-target="#modalAdicionarProduto"
+                    {% if not can_add_product %}disabled title="Limite do plano grátis atingido"{% endif %}>
                     <i class="bi bi-plus-circle-fill"></i> Adicionar Produto
                 </button>
             </div>
+            {% if product_limit %}
+            <p class="text-center mb-0 mt-2">
+                Plano grátis: {{ product_count }}/{{ product_limit }} produtos.
+                {% if not can_add_product %}<a href="{{ url_for('empresa.subscribe', empresa_id=empresa.id) }}" class="text-white fw-bold">Conheça o Pro</a>{% endif %}
+            </p>
+            {% endif %}
         </div>
     </header>
 
@@ -137,7 +149,7 @@
             <div class="col-md-6 col-lg-4 mb-4">
                 <div class="card h-100 shadow-sm">
                     {% if item.imagem %}
-                    <img src="data:image/jpeg;base64,{{ item.imagem }}" alt="{{ item.produto.nome }}"
+                    <img src="data:{{ item.imagem_mime }};base64,{{ item.imagem }}" alt="{{ item.produto.nome }}"
                         class="card-img-top" style="height: 200px; object-fit: cover;">
                     {% else %}
                     <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center"
@@ -185,6 +197,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="formAdicionarProduto" method="POST" action="{{ url_for('add_pizza', empresa_id=current_user.empresa_id) }}" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Foto do Produto (opcional)</label>
@@ -227,6 +240,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="formEditar" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted">Foto do Produto (opcional)</label>
@@ -288,6 +302,8 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        setInterval(() => fetch('/session/heartbeat', { cache: 'no-store' }), 60000);
+
         // Evento para carregar dados no modal de edição
         document.querySelectorAll('.btn-editar').forEach(botao => {
             botao.addEventListener('click', function () {
@@ -327,6 +343,7 @@
                 if (confirm("Tem certeza que deseja apagar este produto?")) {
                     fetch(`/remove/${id}`, {
                         method: 'DELETE',
+                        headers: { 'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content },
                     }).then(response => {
                         if (response.ok) {
                             window.location.reload();

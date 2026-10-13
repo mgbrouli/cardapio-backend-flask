@@ -1,5 +1,7 @@
 """Serviço de autenticação e gerenciamento de usuários."""
 
+import hmac
+
 from argon2 import PasswordHasher
 from argon2.exceptions import InvalidHashError, VerificationError, VerifyMismatchError
 from werkzeug.security import check_password_hash
@@ -57,6 +59,12 @@ class AuthService:
                 senha_valida = check_password_hash(senha_atual, senha)
             except (TypeError, ValueError):
                 senha_valida = False
+            if not senha_valida and not senha_atual.startswith(
+                ("pbkdf2:", "scrypt:", "sha1$", "md5$")
+            ):
+                senha_valida = hmac.compare_digest(
+                    senha_atual.encode("utf-8"), senha.encode("utf-8")
+                )
             if not senha_valida:
                 return {"success": False, "message": "Senha incorreta"}
             self.usuario_repo.update(usuario, senha=password_hasher.hash(senha))

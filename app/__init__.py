@@ -7,7 +7,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
-from app.database import db, request_scope
+from app.database import request_scope
+from app.models import db
 from app.security import AuthenticationRequired
 from config import DEFAULT_SECRET_KEY, get_config
 
@@ -36,9 +37,11 @@ def create_app(config=None):
     )
 
     from app.routes.auth_routes import router as auth_router
+    from app.routes.admin_routes import router as admin_router
     from app.routes.empresa_routes import router as empresa_router
     from app.routes.produto_routes import router as produto_router
     from app.routes.public_routes import router as public_router
+    from app.routes.webhook_routes import router as webhook_router
 
     @app.middleware("http")
     async def database_session_scope(request: Request, call_next):
@@ -58,7 +61,9 @@ def create_app(config=None):
     app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
     app.include_router(public_router)
     app.include_router(auth_router)
+    app.include_router(admin_router)
     app.include_router(empresa_router)
     app.include_router(produto_router)
+    app.include_router(webhook_router)
 
     return app

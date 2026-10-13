@@ -1,7 +1,14 @@
 """Serviço para gerenciar Produtos"""
 import base64
+import logging
+from pathlib import Path
+from sqlalchemy import update
+from app.database import db
+from app.models import Empresa
 from app.repositories.produto_repository import ProdutoRepository
 from app.repositories.imagem_repository import ImagemRepository
+
+logger = logging.getLogger(__name__)
 
 
 class ProdutoService:
@@ -14,6 +21,25 @@ class ProdutoService:
     def criar_produto(self, empresa_id, nome, ingredientes, preco, image_name=None, image_data=None):
         """Cria um novo produto com imagem opcional"""
         try:
+            db.session.execute(
+                update(Empresa)
+                .where(Empresa.id == empresa_id)
+                .values(id=Empresa.id)
+            )
+            empresa = Empresa.query.get(empresa_id)
+            if not empresa:
+                db.session.rollback()
+                return {'success': False, 'message': 'Empresa não encontrada'}
+
+            if empresa.plano not in {"pro", "premium"} and len(
+                self.produto_repo.get_by_empresa(empresa_id)
+            ) >= 10:
+                db.session.rollback()
+                return {
+                    'success': False,
+                    'message': 'O plano grátis permite até 10 produtos. Assine o Pro para cadastrar mais.',
+                }
+
             # Validar preço
             preco = float(preco)
             ingredientes = ingredientes or ""
@@ -39,8 +65,9 @@ class ProdutoService:
         
         except ValueError:
             return {'success': False, 'message': 'Preço inválido'}
-        except Exception as e:
-            return {'success': False, 'message': f'Erro ao criar produto: {str(e)}'}
+        except Exception:
+            logger.exception("Falha ao criar produto para empresa %s", empresa_id)
+            return {'success': False, 'message': 'Erro ao criar produto'}
     
     def obter_produtos_com_imagens(self, empresa_id):
         """Retorna todos os produtos de uma empresa com suas imagens em base64"""
@@ -51,12 +78,19 @@ class ProdutoService:
             imagem = self.imagem_repo.get_by_produto(produto.id)
             
             img_base64 = None
+            img_mime = "image/jpeg"
             if imagem and imagem.image:
                 img_base64 = base64.b64encode(imagem.image).decode('utf-8')
+                img_mime = {
+                    ".png": "image/png",
+                    ".webp": "image/webp",
+                    ".avif": "image/avif",
+                }.get(Path(imagem.name).suffix.lower(), "image/jpeg")
             
             resultado.append({
                 'produto': produto,
-                'imagem': img_base64
+                'imagem': img_base64,
+                'imagem_mime': img_mime,
             })
         
         return resultado
@@ -100,8 +134,9 @@ class ProdutoService:
         
         except ValueError:
             return {'success': False, 'message': 'Preço inválido'}
-        except Exception as e:
-            return {'success': False, 'message': f'Erro ao atualizar produto: {str(e)}'}
+        except Exception:
+            logger.exception("Falha ao atualizar produto %s", produto_id)
+            return {'success': False, 'message': 'Erro ao atualizar produto'}
     
     def deletar_produto(self, produto_id):
         """Deleta um produto"""
@@ -109,5 +144,6 @@ class ProdutoService:
             if self.produto_repo.delete_by_id(produto_id):
                 return {'success': True, 'message': 'Produto deletado com sucesso'}
             return {'success': False, 'message': 'Produto não encontrado'}
-        except Exception as e:
-            return {'success': False, 'message': f'Erro ao deletar produto: {str(e)}'}
+        except Exception:
+            logger.exception("Falha ao deletar produto %s", produto_id)
+            return {'success': False, 'message': 'Erro ao deletar produto'}
